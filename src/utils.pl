@@ -47,3 +47,7 @@ up_cells_until_wall(cell(Row, Col), Cells) :-
 	Row2 is Row-1,
 	up_cells_until_wall(cell(Row2, Col), Cells2),
 	(wall(Row2, Col) -> Cells = []; Cells = [cell(Row2,Col) | Cells2]).
+
+count_lights([], 0).
+count_lights([cell(X,Y)|Cells], Cnt) :-
+	light(X, Y) -> count_lights(Cells, Cnt2), Cnt is Cnt2 + 1; count_lights(Cells, Cnt).
