@@ -51,3 +51,12 @@ up_cells_until_wall(cell(Row, Col), Cells) :-
 count_lights([], 0).
 count_lights([cell(X,Y)|Cells], Cnt) :-
 	light(X, Y) -> count_lights(Cells, Cnt2), Cnt is Cnt2 + 1; count_lights(Cells, Cnt).
+
+
+is_lighted(cell(X,Y)) :-
+	column_cells_until_wall(cell(X,Y), Column),
+	row_cells_until_wall(cell(X,Y), Row),
+	append(Column, Row, Cells),
+	count_lights(Cells, Cnt),
+	!,
+	Cnt > 0.
