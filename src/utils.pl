@@ -60,3 +60,10 @@ is_lighted(cell(X,Y)) :-
 	count_lights(Cells, Cnt),
 	!,
 	Cnt > 0.
+
+% Check if the given wall num has the right light count around it
+is_wall_num_satisfied(cell(X,Y)) :-
+	adjacent_cells(cell(X,Y), Cells),
+	count_lights(Cells, Cnt),
+	wall_num(X, Y, Num),
+	Cnt =:= Num.
