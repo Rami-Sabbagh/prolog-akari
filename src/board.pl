@@ -1,3 +1,5 @@
+% https://krazydad.com/play/akari/?kind=8x8&volumeNumber=1&bookNumber=1&puzzleNumber=1
+
 size(8, 8).
 
 wall(1,2).
