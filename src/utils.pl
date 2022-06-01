@@ -24,3 +24,21 @@ left_cells_until_wall(cell(Row, Col), Cells) :-
 	Col2 is Col-1,
 	left_cells_until_wall(cell(Row, Col2), Cells2),
 	(wall(Row, Col2) -> Cells = []; Cells = [cell(Row,Col2) | Cells2]).
+
+
+column_cells_until_wall(cell(Row, Col), Cells) :-
+	up_cells_until_wall(cell(Row, Col), Up),
+	down_cells_until_wall(cell(Row, Col), Down),
+	append(Up, Down, Cells).
+
+down_cells_until_wall(cell(Row, _), []) :- size(X, _), Row >= X.
+down_cells_until_wall(cell(Row, Col), Cells) :-
+	Row2 is Row+1,
+	down_cells_until_wall(cell(Row2, Col), Cells2),
+	(wall(Row2, Col) -> Cells = []; Cells = [cell(Row2,Col) | Cells2]).
+
+up_cells_until_wall(cell(Row, _), []) :- Row =< 1.
+up_cells_until_wall(cell(Row, Col), Cells) :-
+	Row2 is Row-1,
+	up_cells_until_wall(cell(Row2, Col), Cells2),
+	(wall(Row2, Col) -> Cells = []; Cells = [cell(Row2,Col) | Cells2]).
