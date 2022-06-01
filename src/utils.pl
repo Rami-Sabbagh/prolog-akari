@@ -8,6 +8,9 @@ adjacent_cells(cell(Row, Col), Cells4) :-
 	(Col < Y -> Col1 is Col+1, append(Cells2, [cell(Row, Col1)], Cells3); Cells3 = Cells2),
 	(Col > 1 -> Col2 is Col-1, append(Cells3, [cell(Row, Col2)], Cells4); Cells4 = Cells3).
 
+
+% Get all cells on the right and left of the given cell,
+% until a wall, or the edge of the board is reached.
 row_cells_until_wall(cell(Row, Col), Cells) :-
 	right_cells_until_wall(cell(Row, Col), Right),
 	left_cells_until_wall(cell(Row, Col), Left),
@@ -26,6 +29,8 @@ left_cells_until_wall(cell(Row, Col), Cells) :-
 	(wall(Row, Col2) -> Cells = []; Cells = [cell(Row,Col2) | Cells2]).
 
 
+% Get all cells on the top and bottom of the given cell,
+% until a wall, or the edge of the board is reached.
 column_cells_until_wall(cell(Row, Col), Cells) :-
 	up_cells_until_wall(cell(Row, Col), Up),
 	down_cells_until_wall(cell(Row, Col), Down),
