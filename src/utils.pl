@@ -67,3 +67,28 @@ is_wall_num_satisfied(cell(X,Y)) :-
 	count_lights(Cells, Cnt),
 	wall_num(X, Y, Num),
 	Cnt =:= Num.
+
+% Check the number of valid adjacent cells of a wall with number
+% Num.
+count_valid_adjacent_cells(cell(X,Y), Cnt) :-
+	adjacent_cells(cell(X,Y), Cells),
+	length(Cells,L),
+	nth1(1, Cells, cell(X1,Y1)),
+	(wall(X1, Y1) -> Cnt1 = 0; Cnt1 = 1),
+	nth1(2, Cells, cell(X2,Y2)),
+	(wall(X2, Y2) -> Cnt2 = 0; Cnt2 = 1),
+	(L>2->
+		(nth1(3, Cells, cell(X3,Y3)),
+		(wall(X3, Y3) -> Cnt3 = 0; Cnt3 = 1));
+		Cnt3 = 0),
+	(L>3->
+		(nth1(4, Cells, cell(X4,Y4)),
+		(wall(X4, Y4) -> Cnt4 = 0; Cnt4 = 1));
+		Cnt4 = 0),
+	Cnt is Cnt1 + Cnt2 + Cnt3 + Cnt4.
+
+
+
+% Get all the wall_num cell
+wall_num_cells(Cells) :-
+	findall((X,Y), wall_num(X, Y, _), Cells).
