@@ -69,7 +69,6 @@ is_wall_num_satisfied(cell(X,Y)) :-
 	Cnt =:= Num.
 
 % Check the number of valid adjacent cells of a wall with number
-% Num.
 count_valid_adjacent_cells(cell(X,Y), Cnt) :-
 	adjacent_cells(cell(X,Y), Cells),
 	length(Cells,L),
