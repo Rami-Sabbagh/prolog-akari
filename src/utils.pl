@@ -1,4 +1,27 @@
 :- ensure_loaded(board).
+loop1_print_grid(0,_):-!.
+loop1_print_grid(Row,Column):-
+	Row1 is Row-1,
+	loop1_print_grid(Row1,Column),
+	loop2_print_grid(Row,Column),
+	nl.
+	
+loop2_print_grid(_,0):-!.
+loop2_print_grid(Row,Column):-
+	Column1 is Column-1,
+	loop2_print_grid(Row,Column1),
+	print_cell(Row,Column).
+
+print_grid :-
+	size(Xmax,Ymax),
+	loop1_print_grid(Xmax,Ymax).
+
+print_cell(X,Y):-
+	wall_num(X,Y,Z)->format('~w',[Z]);(
+		wall(X,Y)->write('W');(
+			light(X,Y)->write('L');write('*')
+		)
+	).
 
 adjacent_cells(cell(Row, Col), Cells4) :-
 	Cells0 = [],
@@ -91,3 +114,6 @@ count_valid_adjacent_cells(cell(X,Y), Cnt) :-
 % Get all the wall_num cell
 wall_num_cells(Cells) :-
 	findall((X,Y), wall_num(X, Y, _), Cells).
+	% set_light(Cells).
+
+% set the light of the cells
