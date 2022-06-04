@@ -1,0 +1,6 @@
+node_modules
+/dist
+/data
+
+*.tsbuildinfo
+/scraper_state.json
