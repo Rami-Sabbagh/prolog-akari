@@ -1,4 +1,6 @@
 :- ensure_loaded(board).
+:- dynamic light/2.
+
 loop1_print_grid(0,_):-!.
 loop1_print_grid(Row,Column):-
 	Row1 is Row-1,
@@ -92,28 +94,39 @@ is_wall_num_satisfied(cell(X,Y)) :-
 	Cnt =:= Num.
 
 % Check the number of valid adjacent cells of a wall with number
-count_valid_adjacent_cells(cell(X,Y), Cnt) :-
+valid_adjacent_cells(cell(X,Y), Cells4) :-
+	Cells0 = [],
 	adjacent_cells(cell(X,Y), Cells),
 	length(Cells,L),
 	nth1(1, Cells, cell(X1,Y1)),
-	(wall(X1, Y1) -> Cnt1 = 0; Cnt1 = 1),
+	((wall(X1, Y1);is_lighted(cell(X1,Y1))) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
 	nth1(2, Cells, cell(X2,Y2)),
-	(wall(X2, Y2) -> Cnt2 = 0; Cnt2 = 1),
+	((wall(X2, Y2);is_lighted(cell(X2,Y2))) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
 	(L>2->
 		(nth1(3, Cells, cell(X3,Y3)),
-		(wall(X3, Y3) -> Cnt3 = 0; Cnt3 = 1));
-		Cnt3 = 0),
+		((wall(X3, Y3);is_lighted(cell(X3,Y3))) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
+		Cells3 = Cells2),
 	(L>3->
 		(nth1(4, Cells, cell(X4,Y4)),
-		(wall(X4, Y4) -> Cnt4 = 0; Cnt4 = 1));
-		Cnt4 = 0),
-	Cnt is Cnt1 + Cnt2 + Cnt3 + Cnt4.
+		((wall(X4, Y4);is_lighted(cell(X4,Y4))) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
+		Cells4 = Cells3).
 
 
 
 % Get all the wall_num cell
-wall_num_cells(Cells) :-
-	findall((X,Y), wall_num(X, Y, _), Cells).
-	% set_light(Cells).
+solve :-
+	findall(cell(X,Y),(wall_num(X, Y, _),not(is_wall_num_satisfied(cell(X,Y)))), Cells),
+	Cells \= [] -> (set_light(Cells),solve);!.
 
 % set the light of the cells
+set_light([]):-!.
+set_light([cell(X,Y)|Rest]) :-
+	wall_num(X,Y,N),
+	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
+	length(Valid_adjacent_cells,L),
+	(L = N -> (assert_adjacent_light(Valid_adjacent_cells),set_light(Rest));set_light(Rest)).
+
+assert_adjacent_light([]):-!.
+assert_adjacent_light([cell(X,Y)|Rest]):-
+	assert(light(X,Y)),
+	assert_adjacent_light(Rest).

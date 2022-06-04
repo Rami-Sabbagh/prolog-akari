@@ -30,11 +30,11 @@ wall_num(6, 3, 1).
 wall_num(6, 7, 2).
 
 % Solution
-light(1, 1).
-light(1, 5).
-light(1, 8).
-light(2, 7).
-light(4, 6).
-light(5, 7).
-light(6, 4).
-light(7, 7).
+% light(1, 1).
+% light(1, 5).
+% light(1, 8).
+% light(2, 7).
+% light(4, 6).
+% light(5, 7).
+% light(6, 4).
+% light(7, 7).
