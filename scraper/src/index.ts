@@ -8,6 +8,7 @@ if (!fs.existsSync('./data')) fs.mkdirSync('./data');
 const dimensions = [20, 8, 10, 12, 15];
 
 let state = {
+    delay: 5_000,
     dimensionIndex: 0,
     volume: 1,
     book: 1,
@@ -18,6 +19,10 @@ if (fs.existsSync('./scraper_state.json')) state = JSON.parse(fs.readFileSync('.
 
 function saveState() {
     fs.writeFileSync('./scraper_state.json', JSON.stringify(state, null, 4));
+}
+
+async function delay(time: number) {
+    return new Promise(resolve => setTimeout(resolve, time));
 }
 
 async function main() {
@@ -32,6 +37,8 @@ async function main() {
                 for (; state.puzzle <= maxPuzzles; state.puzzle++) {
                     saveState();
                     console.log(new Date(), `📄 ${dimension}x${dimension} puzzle #${state.puzzle} from Vol.${state.volume}, Book no.${state.book}`);
+                    await delay(state.delay);
+                    
                     try {
                         const puzzle = await fetchLevel(dimension, state.puzzle, state.book, state.volume);
 
