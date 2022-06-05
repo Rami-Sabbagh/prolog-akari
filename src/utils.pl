@@ -133,3 +133,20 @@ assert_adjacent_light([]):-!.
 assert_adjacent_light([cell(X,Y)|Rest]):-
 	assert(light(X,Y)),
 	assert_adjacent_light(Rest).
+
+clear_grid :-
+	findall(cell(X,Y),light(X,Y), Light_cells),
+	remove_light(Light_cells).
+	% findall(cell(X,Y),not_light(X,Y), Not_light_cells),
+	% remove_not_light(Not_light_cells).
+
+
+remove_light([]):-!.
+remove_light([cell(X,Y)|Rest]):-
+	retract(light(X,Y)),
+	remove_light(Rest).
+
+% remove_not_light([]):-!.
+% remove_not_light([cell(X,Y)|Rest]):-
+% 	retract(not_light(X,Y)),
+% 	remove_not_light(Rest).
