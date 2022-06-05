@@ -1,6 +1,8 @@
 :- begin_tests(utils).
 :- use_module(dataset).
 
+:- include(utils).
+
 test_puzzle:-
     size(Dimension, Dimension).
 
