@@ -1,6 +1,9 @@
-:- ensure_loaded(board).
-:- dynamic light/2.
+:- ensure_loaded(dataset).
 :- dynamic not_light/2.
+
+choose_nth1_puzzle(Index):-
+	assert_nth1_puzzle(Index),
+	clear_grid.
 
 loop1_print_grid(0,_):-!.
 loop1_print_grid(Row,Column):-
@@ -135,18 +138,5 @@ assert_adjacent_light([cell(X,Y)|Rest]):-
 	assert_adjacent_light(Rest).
 
 clear_grid :-
-	findall(cell(X,Y),light(X,Y), Light_cells),
-	remove_light(Light_cells).
-	% findall(cell(X,Y),not_light(X,Y), Not_light_cells),
-	% remove_not_light(Not_light_cells).
-
-
-remove_light([]):-!.
-remove_light([cell(X,Y)|Rest]):-
-	retract(light(X,Y)),
-	remove_light(Rest).
-
-% remove_not_light([]):-!.
-% remove_not_light([cell(X,Y)|Rest]):-
-% 	retract(not_light(X,Y)),
-% 	remove_not_light(Rest).
+	retractall(light(X,Y)),
+	print_grid.
