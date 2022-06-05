@@ -1,4 +1,4 @@
-:- ensure_loaded(dataset).
+:- use_module(dataset).
 :- dynamic not_light/2.
 
 choose_nth1_puzzle(Index):-
