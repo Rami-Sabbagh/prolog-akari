@@ -7,6 +7,9 @@
 dataset(Handle):-
     new_table('packed-data.csv', [
         title(string),
+        volume(integer),
+        book(integer),
+        level(integer),
         width(integer),
         height(integer),
         work(integer),

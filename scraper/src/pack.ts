@@ -29,7 +29,8 @@ const packedFile = fs.createWriteStream('./packed-data.csv');
 
 for (const filename of fs.readdirSync('./data').sort(puzzlesCompare)) {
     const puzzle: PuzzleData = JSON.parse(fs.readFileSync(`./data/${filename}`, 'utf8'));
-    packedFile.write(`${puzzle.ptitle},${puzzle.width},${puzzle.height},${puzzle.work},${puzzle.puzz},${puzzle.solved}\n`);
+    const puzzleID = parseFilename(filename);
+    packedFile.write(`${puzzle.ptitle},${puzzleID.volume},${puzzleID.book},${puzzleID.puzzle},${puzzle.width},${puzzle.height},${puzzle.work},${puzzle.puzz},${puzzle.solved}\n`);
 }
 
 packedFile.close();
