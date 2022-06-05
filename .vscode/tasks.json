@@ -16,9 +16,9 @@
                 "isDefault": true
             },
             "presentation": {
-                "echo": true,
+                "echo": false,
                 "reveal": "always",
-                "focus": false,
+                "focus": true,
                 "panel": "shared",
                 "showReuseMessage": true,
                 "clear": true
