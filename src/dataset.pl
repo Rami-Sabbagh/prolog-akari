@@ -65,11 +65,11 @@ assert_puzzle(Puzzle, Width, Height, Offset):-
 
 assert_puzzle_cell(0'., _, _).
 assert_puzzle_cell(0'#, X, Y):- assertz(wall(X, Y)).
-assert_puzzle_cell(0'0, X, Y):- assertz(wall_num(X, Y, 0)).
-assert_puzzle_cell(0'1, X, Y):- assertz(wall_num(X, Y, 1)).
-assert_puzzle_cell(0'2, X, Y):- assertz(wall_num(X, Y, 2)).
-assert_puzzle_cell(0'3, X, Y):- assertz(wall_num(X, Y, 3)).
-assert_puzzle_cell(0'4, X, Y):- assertz(wall_num(X, Y, 4)).
+assert_puzzle_cell(0'0, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 0)).
+assert_puzzle_cell(0'1, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 1)).
+assert_puzzle_cell(0'2, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 2)).
+assert_puzzle_cell(0'3, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 3)).
+assert_puzzle_cell(0'4, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 4)).
 
 % --------------------
 
