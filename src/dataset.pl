@@ -6,10 +6,13 @@
 
     wall/2,
     wall_num/3,
-    light/2, % use retractall(light) to unload the predefined solution
+    light/2, % use unsolve/0 to unload the predefined solution
 
     title/1,
-    size/2
+    size/2,
+
+    unsolve/0,
+    reset_level/0
 ]).
 
 :- dynamic(wall/2),dynamic(wall_num/3),dynamic(light/2),dynamic(title/1),dynamic(size/2).
@@ -17,6 +20,16 @@
 % ------------------------------------- %
 % BELOW THIS RESIDES THE IMPLEMENTATION %
 % ------------------------------------- %
+
+unsolve:-
+    retractall(light/2).
+
+reset_level:-
+    retractall(wall/2),
+    retractall(wall_num/3),
+    retractall(light/2),
+    retractall(title/1),
+    retractall(size/2).
 
 dataset(Handle):-
     new_table('packed-data.csv', [
