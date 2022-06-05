@@ -6,10 +6,13 @@
 
     wall/2,
     wall_num/3,
-    light/2, % use retractall(light) to unload the predefined solution
+    light/2, % use unsolve/0 to unload the predefined solution
 
     title/1,
-    size/2
+    size/2,
+
+    unsolve/0,
+    reset_level/0
 ]).
 
 :- dynamic(wall/2),dynamic(wall_num/3),dynamic(light/2),dynamic(title/1),dynamic(size/2).
@@ -17,6 +20,16 @@
 % ------------------------------------- %
 % BELOW THIS RESIDES THE IMPLEMENTATION %
 % ------------------------------------- %
+
+unsolve:-
+    retractall(light/2).
+
+reset_level:-
+    retractall(wall/2),
+    retractall(wall_num/3),
+    retractall(light/2),
+    retractall(title/1),
+    retractall(size/2).
 
 dataset(Handle):-
     new_table('packed-data.csv', [
@@ -52,10 +65,11 @@ assert_puzzle(Puzzle, Width, Height, Offset):-
 
 assert_puzzle_cell(0'., _, _).
 assert_puzzle_cell(0'#, X, Y):- assertz(wall(X, Y)).
-assert_puzzle_cell(0'1, X, Y):- assertz(wall_num(X, Y, 1)).
-assert_puzzle_cell(0'2, X, Y):- assertz(wall_num(X, Y, 2)).
-assert_puzzle_cell(0'3, X, Y):- assertz(wall_num(X, Y, 3)).
-assert_puzzle_cell(0'4, X, Y):- assertz(wall_num(X, Y, 4)).
+assert_puzzle_cell(0'0, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 0)).
+assert_puzzle_cell(0'1, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 1)).
+assert_puzzle_cell(0'2, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 2)).
+assert_puzzle_cell(0'3, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 3)).
+assert_puzzle_cell(0'4, X, Y):- assertz(wall(X, Y)),assertz(wall_num(X, Y, 4)).
 
 % --------------------
 
@@ -100,7 +114,7 @@ assert_nth0_puzzle(Index):-
     assert_nth0_puzzle(Index, Handle, 0),!.
 
 assert_nth0_puzzle(0, Handle, Offset):-
-    assert_puzzle_at(Handle, Offset).
+    !, assert_puzzle_at(Handle, Offset).
 
 assert_nth0_puzzle(Index, Handle, Offset):-
     read_table_record_data(Handle, Offset, Next, _),

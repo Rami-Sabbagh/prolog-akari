@@ -5,3 +5,4 @@ node_modules
 *.tsbuildinfo
 /scraper_state.json
 /packed-data.csv
+/packed-tests.plt
