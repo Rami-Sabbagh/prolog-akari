@@ -122,7 +122,7 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 % Get all the wall_num cell
 solve :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
-	Cells \= [] -> (set_light(Cells));(print_grid,!).
+	Cells \= [] -> (set_light(Cells),solve);(print_grid,!).
 
 % set the light of the cells
 set_light([]):-!.
