@@ -138,5 +138,5 @@ assert_adjacent_light([cell(X,Y)|Rest]):-
 	assert_adjacent_light(Rest).
 
 clear_grid :-
-	retractall(light(X,Y)),
+	unsolve,
 	print_grid.
