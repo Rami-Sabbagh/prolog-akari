@@ -65,6 +65,7 @@ assert_puzzle(Puzzle, Width, Height, Offset):-
 
 assert_puzzle_cell(0'., _, _).
 assert_puzzle_cell(0'#, X, Y):- assertz(wall(X, Y)).
+assert_puzzle_cell(0'0, X, Y):- assertz(wall_num(X, Y, 0)).
 assert_puzzle_cell(0'1, X, Y):- assertz(wall_num(X, Y, 1)).
 assert_puzzle_cell(0'2, X, Y):- assertz(wall_num(X, Y, 2)).
 assert_puzzle_cell(0'3, X, Y):- assertz(wall_num(X, Y, 3)).
@@ -113,7 +114,7 @@ assert_nth0_puzzle(Index):-
     assert_nth0_puzzle(Index, Handle, 0),!.
 
 assert_nth0_puzzle(0, Handle, Offset):-
-    assert_puzzle_at(Handle, Offset).
+    !, assert_puzzle_at(Handle, Offset).
 
 assert_nth0_puzzle(Index, Handle, Offset):-
     read_table_record_data(Handle, Offset, Next, _),
