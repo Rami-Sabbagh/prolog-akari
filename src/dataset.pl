@@ -1,8 +1,22 @@
 :- module(dataset, [
-    dataset/1,
-    assert_puzzle/3,
-    assert_solution/3
+    assert_nth0_puzzle/1, % assert_nth0_puzzle(Index)
+    assert_nth1_puzzle/1, % assert_nth1_puzzle(Index)
+    assert_indexed_puzzle/4, %assert_indexed_puzzle(Size, Volume, Book, No)
+    puzzle_exists/4, % puzzle_exists(Size, Volume, Book, No)
+
+    wall/2,
+    wall_num/3,
+    light/2, % use retractall(light) to unload the predefined solution
+
+    title/1,
+    size/2
 ]).
+
+:- dynamic(wall/2),dynamic(wall_num/3),dynamic(light/2),dynamic(title/1),dynamic(size/2).
+
+% ------------------------------------- %
+% BELOW THIS RESIDES THE IMPLEMENTATION %
+% ------------------------------------- %
 
 dataset(Handle):-
     new_table('packed-data.csv', [
@@ -63,14 +77,55 @@ assert_solution_cell(0'1, X, Y):- assertz(light(X, Y)).
 
 % --------------------
 
-load_first_puzzle:-
-    dataset(Handle),
-    read_table_fields(Handle, 0, _, [
+assert_puzzle_at(Handle, Pos):-
+    read_table_fields(Handle, Pos, _, [
+        title(Title),
         width(Width),
         height(Height),
-        puzzle(Puzzle)
+        puzzle(Puzzle),
+        solution(Solution)
     ]),
-    assert_puzzle(Puzzle, Width, Height), !.
+    assertz(title(Title)),
+    assert_puzzle(Puzzle, Width, Height),
+    assert_solution(Solution, Width, Height).
 
-% read_table_fields(D, 0, N, [width(W),puzzle(P)]).
+% --------------------
 
+assert_nth1_puzzle(Index):-
+    ActualIndex is Index - 1,
+    assert_nth0_puzzle(ActualIndex).
+
+assert_nth0_puzzle(Index):-
+    dataset(Handle),
+    assert_nth0_puzzle(Index, Handle, 0),!.
+
+assert_nth0_puzzle(0, Handle, Offset):-
+    assert_puzzle_at(Handle, Offset).
+
+assert_nth0_puzzle(Index, Handle, Offset):-
+    read_table_record_data(Handle, Offset, Next, _),
+    NextIndex is Index - 1,
+    assert_nth0_puzzle(NextIndex, Handle, Next).
+
+% --------------------
+
+puzzle_exists(Size, Volume, Book, No):-
+    dataset(Handle),
+    in_table(Handle, [
+        volume(Volume),
+        book(Book),
+        level(No),
+        width(Size),
+        height(Size)
+    ], _).
+
+assert_indexed_puzzle(Size, Volume, Book, No):-
+    dataset(Handle),
+    in_table(Handle, [
+        volume(Volume),
+        book(Book),
+        level(No),
+        width(Size),
+        height(Size)
+    ], Pos),
+    assert_puzzle_at(Handle, Pos).
