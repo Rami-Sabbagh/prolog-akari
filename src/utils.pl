@@ -1,5 +1,6 @@
 :- ensure_loaded(board).
 :- dynamic light/2.
+:- dynamic not_light/2.
 
 loop1_print_grid(0,_):-!.
 loop1_print_grid(Row,Column):-
@@ -21,7 +22,9 @@ print_grid :-
 print_cell(X,Y):-
 	wall_num(X,Y,Z)->format('~w',[Z]);(
 		wall(X,Y)->write('W');(
-			light(X,Y)->write('L');write('*')
+			light(X,Y)->write('L');(
+				not_light(X,Y)->write('X');write('*')
+			)
 		)
 	).
 
@@ -116,7 +119,7 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 % Get all the wall_num cell
 solve :-
 	findall(cell(X,Y),(wall_num(X, Y, _),not(is_wall_num_satisfied(cell(X,Y)))), Cells),
-	Cells \= [] -> (set_light(Cells),solve);!.
+	Cells \= [] -> (set_light(Cells),solve);(print_grid,!).
 
 % set the light of the cells
 set_light([]):-!.
