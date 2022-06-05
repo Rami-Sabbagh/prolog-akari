@@ -22,14 +22,14 @@
 % ------------------------------------- %
 
 unsolve:-
-    retractall(light/2).
+    retractall(light(_,_)).
 
 reset_level:-
-    retractall(wall/2),
-    retractall(wall_num/3),
-    retractall(light/2),
-    retractall(title/1),
-    retractall(size/2).
+    retractall(wall(_,_)),
+    retractall(wall_num(_,_,_)),
+    retractall(light(_,_)),
+    retractall(title(_)),
+    retractall(size(_,_)).
 
 dataset(Handle):-
     new_table('packed-data.csv', [
