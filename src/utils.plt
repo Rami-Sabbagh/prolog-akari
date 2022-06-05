@@ -1,3 +1,9 @@
+% Quickstart:
+
+% ?- [utils].
+% ?- load_test_files([]).
+% ?- run_tests.
+
 :- begin_tests(utils).
 :- use_module(dataset).
 
