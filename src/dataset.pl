@@ -1,8 +1,8 @@
 :- module(dataset, [
-    assert_nth0_puzzle/1, % assert_nth0_puzzle(Index)
-    assert_nth1_puzzle/1, % assert_nth1_puzzle(Index)
-    assert_indexed_puzzle/4, %assert_indexed_puzzle(Size, Volume, Book, No)
-    puzzle_exists/4, % puzzle_exists(Size, Volume, Book, No)
+    assert_nth0_puzzle/1, % assert_nth0_puzzle(Index). % 1826 is the first 20x20 puzzle.
+    assert_nth1_puzzle/1, % assert_nth1_puzzle(Index). % 1827 is the first 20x20 puzzle.
+    assert_indexed_puzzle/4, % assert_indexed_puzzle(Size, Volume, Book, No).
+    puzzle_exists/4, % puzzle_exists(Size, Volume, Book, No).
 
     wall/2,
     wall_num/3,
