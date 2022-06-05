@@ -26,11 +26,16 @@ function puzzlesCompare(a: string, b: string): number {
 }
 
 const packedFile = fs.createWriteStream('./packed-data.csv');
+const prologTests = fs.createWriteStream('./packed-tests.plt');
+
+let counter = 0;
 
 for (const filename of fs.readdirSync('./data').sort(puzzlesCompare)) {
     const puzzle: PuzzleData = JSON.parse(fs.readFileSync(`./data/${filename}`, 'utf8'));
     const puzzleID = parseFilename(filename);
     packedFile.write(`${puzzle.ptitle},${puzzleID.volume},${puzzleID.book},${puzzleID.puzzle},${puzzle.width},${puzzle.height},${puzzle.work},${puzzle.puzz},${puzzle.solved}\n`);
+    prologTests.write(`test('${puzzle.ptitle}',[setup(assert_nth0_puzzle(${counter++})), cleanup(reset_level)]):- test_puzzle,!.\r\n`);
 }
 
 packedFile.close();
+prologTests.close();
