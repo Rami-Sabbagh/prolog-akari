@@ -9,8 +9,7 @@
 
 :- include(utils).
 
-test_puzzle:-
-    size(Dimension, Dimension).
+test_puzzle.
 
 % -- ENABLE ONE AT A TIME -- %
 
