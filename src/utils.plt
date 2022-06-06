@@ -10,6 +10,7 @@
 :- include(utils).
 
 test_puzzle:-
+    nl,print_grid,nl,
     size(Dimension, Dimension).
 
 % -- ENABLE ONE AT A TIME -- %
