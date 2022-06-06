@@ -11,16 +11,16 @@ choose_nth1_puzzle(Index):-
 
 print_grid:-
 	size(Columns, Rows),
-	between(1, Rows, Y),
-	between(1, Columns, X),
-	(X =:= 1 -> nl; true),
-	\+ print_cell(X,Y); true.
+	between(1, Rows, R),
+	between(1, Columns, C),
+	(C =:= 1 -> nl; true),
+	\+ print_cell(R,C); true.
 
-print_cell(X,Y):-
-	wall_num(X,Y,Z),ansi_format([bg(white),fg(black)],Z,[]);
-	wall(X,Y),ansi_format([bg(white),fg(white)],'#',[]);
-	light(X,Y),ansi_format([fg(yellow),bold],'*',[]);
-	not_light(X,Y),ansi_format([fg(magenta)],'.',[]);
+print_cell(R,C):-
+	wall_num(R,C,Z),ansi_format([bg(white),fg(black)],Z,[]);
+	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
+	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
+	not_light(R,C),ansi_format([fg(magenta)],'.',[]);
 	ansi_format([fg(cyan)],'•',[]).
 
 %get adjacent cells of a given cell
