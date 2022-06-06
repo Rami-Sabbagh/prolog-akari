@@ -6,22 +6,13 @@ choose_nth1_puzzle(Index):-
 	assert_nth1_puzzle(Index),
 	clear_grid.
 
-loop1_print_grid(0,_):-!.
-loop1_print_grid(Row,Column):-
-	Row1 is Row-1,
-	loop1_print_grid(Row1,Column),
-	loop2_print_grid(Row,Column),
-	nl.
+print_grid:-
+	size(Columns, Rows),
+	between(1, Rows, Y),
+	between(1, Columns, X),
+	(X =:= 1 -> nl; true),
+	\+ print_cell(X,Y); true.
 	
-loop2_print_grid(_,0):-!.
-loop2_print_grid(Row,Column):-
-	Column1 is Column-1,
-	loop2_print_grid(Row,Column1),
-	print_cell(Row,Column).
-
-print_grid :-
-	size(Xmax,Ymax),
-	loop1_print_grid(Xmax,Ymax).
 
 print_cell(X,Y):-
 	wall_num(X,Y,Z),ansi_format([bg(white),fg(black)],Z,[]);
