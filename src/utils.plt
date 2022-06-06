@@ -9,7 +9,7 @@
 
 :- include(utils).
 
-test_puzzle.
+
 
 % -- ENABLE ONE AT A TIME -- %
 
