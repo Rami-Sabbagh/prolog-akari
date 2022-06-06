@@ -1,3 +1,4 @@
+﻿:- encoding(utf8).
 :- use_module(dataset).
 :- dynamic not_light/2.
 
@@ -23,13 +24,11 @@ print_grid :-
 	loop1_print_grid(Xmax,Ymax).
 
 print_cell(X,Y):-
-	wall_num(X,Y,Z)->format('~w',[Z]);(
-		wall(X,Y)->write('W');(
-			light(X,Y)->write('L');(
-				not_light(X,Y)->write('X');write('*')
-			)
-		)
-	).
+	wall_num(X,Y,Z),print(Z);
+	wall(X,Y),write('#');
+	light(X,Y),write('*');
+	not_light(X,Y),write('.');
+	write('•').
 
 adjacent_cells(cell(Row, Col), Cells4) :-
 	Cells0 = [],
