@@ -1,10 +1,11 @@
 ﻿:- encoding(utf8).
 :- use_module(dataset).
-:- use_module(library(theme/dark)).
+% :- use_module(library(theme/dark)).
 :- dynamic not_light/2.
 
 % Choosing the puzzle
 choose_nth1_puzzle(Index):-
+	reset_level,
 	assert_nth1_puzzle(Index),
 	clear_grid.
 
@@ -111,8 +112,11 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 
 % Solve the grid
 solve :-
+	satisfy_wall_nums(2).
+
+satisfy_wall_nums(Cnt) :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
-	Cells \= [] -> (set_light(Cells),solve);(print_grid,!).
+	(Cells \= [] , Cnt>0) -> (set_light(Cells),Cnt1 is Cnt -1,satisfy_wall_nums(Cnt1));(print_grid,!).
 
 % Set the light to the satisfied wall num
 set_light([]):-!.
