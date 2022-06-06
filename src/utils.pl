@@ -20,7 +20,7 @@ print_cell(R,C):-
 	wall_num(R,C,Z),ansi_format([bg(white),fg(black)],Z,[]);
 	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
 	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
-	not_light(R,C),ansi_format([fg(magenta)],'.',[]);
+	not_light(R,C),ansi_format([fg(magenta)],'•',[]);
 	ansi_format([fg(cyan)],'•',[]).
 
 %get adjacent cells of a given cell
@@ -98,38 +98,59 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 	adjacent_cells(cell(X,Y), Cells),
 	length(Cells,L),
 	nth1(1, Cells, cell(X1,Y1)),
-	((wall(X1, Y1);is_lighted(cell(X1,Y1))) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
+	((wall(X1, Y1);is_lighted(cell(X1,Y1));light(X1,Y1);not_light(X1,Y1)) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
 	nth1(2, Cells, cell(X2,Y2)),
-	((wall(X2, Y2);is_lighted(cell(X2,Y2))) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
+	((wall(X2, Y2);is_lighted(cell(X2,Y2));light(X2,Y2);not_light(X2,Y2)) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
 	(L>2->
 		(nth1(3, Cells, cell(X3,Y3)),
-		((wall(X3, Y3);is_lighted(cell(X3,Y3))) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
+		((wall(X3, Y3);is_lighted(cell(X3,Y3));light(X3,Y3);not_light(X3,Y3)) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
 		Cells3 = Cells2),
 	(L>3->
 		(nth1(4, Cells, cell(X4,Y4)),
-		((wall(X4, Y4);is_lighted(cell(X4,Y4))) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
+		((wall(X4, Y4);is_lighted(cell(X4,Y4));light(X4,Y4);not_light(X4,Y4)) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
 		Cells4 = Cells3).
 
 % Solve the grid
 solve :-
-	satisfy_wall_nums(2).
+	satisfy_wall_nums(2),
+	block_satisfied_wall_nums,
+	print_grid.
 
 satisfy_wall_nums(Cnt) :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
-	(Cells \= [] , Cnt>0) -> (set_light(Cells),Cnt1 is Cnt -1,satisfy_wall_nums(Cnt1));(print_grid,!).
+	(Cells \= [] , Cnt>0) -> (set_light(Cells),Cnt1 is Cnt -1,satisfy_wall_nums(Cnt1));!.
 
 % Set the light to the satisfied wall num
 set_light([]):-!.
 set_light([cell(X,Y)|Rest]) :-
 	wall_num(X,Y,N),
+	adjacent_cells(cell(X,Y),Adjacent_cells),
 	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
 	length(Valid_adjacent_cells,L),
-	(L = N -> (assert_adjacent_light(Valid_adjacent_cells),set_light(Rest));set_light(Rest)).
+	count_lights(Adjacent_cells,Cnt),
+	N1 is N-Cnt,
+	(L = N1 -> (assert_adjacent_light(Valid_adjacent_cells),set_light(Rest));set_light(Rest)).
 
 assert_adjacent_light([]):-!.
 assert_adjacent_light([cell(X,Y)|Rest]):-
 	assert(light(X,Y)),
 	assert_adjacent_light(Rest).
+
+block_satisfied_wall_nums :-
+	findall(cell(X,Y),(wall_num(X, Y, _),is_wall_num_satisfied(cell(X,Y))), Cells),
+	(Cells \= []) -> block_light(Cells);!.
+
+block_light([]):-!.
+block_light([cell(X,Y)|Rest]) :-
+	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
+	assert_adjacent_no_light(Valid_adjacent_cells),
+	block_light(Rest).
+
+assert_adjacent_no_light([]):-!.
+assert_adjacent_no_light([cell(X,Y)|Rest]):-
+	assert(not_light(X,Y)),
+	assert_adjacent_no_light(Rest).
+
 
 clear_grid :-
 	unsolve,
