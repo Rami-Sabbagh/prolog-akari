@@ -1,6 +1,5 @@
 ﻿:- encoding(utf8).
 :- use_module(dataset).
-:- use_module(library(theme/dark)).
 :- dynamic not_light/2.
 
 % Choosing the puzzle
