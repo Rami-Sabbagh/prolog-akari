@@ -50,7 +50,7 @@ dataset(Handle):-
 % --------------------
 
 assert_puzzle(Puzzle, Width, Height):-
-    assertz(size(Width, Height)),
+    assertz(size(Height, Width)),
     assert_puzzle(Puzzle, Width, Height, 0).
     
 assert_puzzle(_, Width, Height, Offset):- Offset >= (Width * Height).
