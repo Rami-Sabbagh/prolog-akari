@@ -7,6 +7,7 @@
     wall/2,
     wall_num/3,
     light/2, % use unsolve/0 to unload the predefined solution
+    not_light/2,
 
     title/1,
     size/2,
@@ -15,19 +16,20 @@
     reset_level/0
 ]).
 
-:- dynamic(wall/2),dynamic(wall_num/3),dynamic(light/2),dynamic(title/1),dynamic(size/2).
+:- dynamic(wall/2),dynamic(wall_num/3),dynamic(light/2),dynamic(title/1),dynamic(size/2),dynamic(not_light/2).
 
 % ------------------------------------- %
 % BELOW THIS RESIDES THE IMPLEMENTATION %
 % ------------------------------------- %
 
 unsolve:-
-    retractall(light(_,_)).
+    retractall(light(_,_)),
+    retractall(not_light(_,_)).
 
 reset_level:-
+    unsolve,
     retractall(wall(_,_)),
     retractall(wall_num(_,_,_)),
-    retractall(light(_,_)),
     retractall(title(_)),
     retractall(size(_,_)).
 

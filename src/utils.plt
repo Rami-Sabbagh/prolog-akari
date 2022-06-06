@@ -12,12 +12,14 @@
 test_puzzle:-
     solved,
     unsolve,
-    \+ solved.
+    \+ solved,
+    solve,
+    solved.
 
 % -- ENABLE ONE AT A TIME -- %
 
-:- include('tests_picked'). % handpicked tests
+% :- include('tests_picked'). % handpicked tests
 % :- include('tests_partial'). % 60 tests
-% :- include('tests_full'). % 2,756 tests
+:- include('tests_full'). % 2,756 tests
 
 :- end_tests(utils).

@@ -1,7 +1,6 @@
 ﻿:- encoding(utf8).
 :- use_module(dataset).
 % :- use_module(library(theme/dark)).
-:- dynamic not_light/2.
 
 % Choosing the puzzle
 choose_nth1_puzzle(Index):-
@@ -22,6 +21,23 @@ print_cell(R,C):-
 	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
 	not_light(R,C),ansi_format([fg(magenta)],'•',[]);
 	ansi_format([fg(cyan)],'•',[]).
+
+% Check double agents
+no_double_light :-
+	size(Columns, Rows),
+	between(1, Rows, R),
+	between(1, Columns, C),
+	\+ check_double(R,C) -> !,false; !,true.
+
+check_double(X,Y) :-
+	(wall(X,Y);light(X,Y))->true;
+		(column_cells_until_wall(cell(X,Y), Column),
+		row_cells_until_wall(cell(X,Y), Row),
+		count_lights(Column, Cnt1),
+		count_lights(Row, Cnt2),
+		!,
+		Cnt1 =< 1,
+		Cnt2 =< 1).
 
 %get adjacent cells of a given cell
 adjacent_cells(cell(Row, Col), Cells4) :-
@@ -112,9 +128,25 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 
 % Solve the grid
 solve :-
-	satisfy_wall_nums(2),
+	iterate_solve(5),
+	light_rest.
+
+iterate_solve(0).
+iterate_solve(Cnt):-
+	Cnt > 0,
+	satisfy_wall_nums(5),
 	block_satisfied_wall_nums,
-	print_grid.
+	Cnt1 is Cnt-1,
+	iterate_solve(Cnt1).
+
+light_rest:-
+	size(Columns, Rows),
+	between(1, Rows, Y),
+	between(1, Columns, X),
+	\+ check(X,Y) -> !,false; !,true.
+
+check(X,Y):-
+	(is_lighted(cell(X,Y));wall(X,Y);not_light(X,Y))->true;assert(light(X,Y)).
 
 satisfy_wall_nums(Cnt) :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
@@ -159,10 +191,11 @@ clear_grid :-
 % Validating the solution
 
 solved :-
+	no_double_light,(
 	size(Columns, Rows),
 	between(1, Rows, Y),
 	between(1, Columns, X),
-	\+ cell_solved(X, Y) -> !,false; !,true.
+	\+ cell_solved(X, Y) -> !,false; !,true).
 
 cell_solved(X,Y):-
 	wall(X,Y),!;
