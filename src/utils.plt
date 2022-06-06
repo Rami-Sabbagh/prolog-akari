@@ -10,8 +10,9 @@
 :- include(utils).
 
 test_puzzle:-
-    nl,print_grid,nl,
-    solved.
+    solved,
+    unsolve,
+    \+ solved.
 
 % -- ENABLE ONE AT A TIME -- %
 
