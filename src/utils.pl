@@ -2,6 +2,28 @@
 :- use_module(dataset).
 :- dynamic not_light/2.
 
+% Testing the solution
+test_puzzle :-
+	size(Xmax,Ymax),
+	loop1_test_puzzle(Xmax,Ymax).
+
+loop1_test_puzzle(0,_):-!.
+loop1_test_puzzle(Row,Column):-
+	Row1 is Row-1,
+	loop1_test_puzzle(Row1,Column),
+	loop2_test_puzzle(Row,Column).
+	
+loop2_test_puzzle(_,0):-!.
+loop2_test_puzzle(Row,Column):-
+	Column1 is Column-1,
+	loop2_test_puzzle(Row,Column1),
+	test_cell(Row,Column).
+
+test_cell(X,Y):-
+	(wall(X,Y);light(X,Y))->!;(wall_num(X,Y,_)->
+		is_wall_num_satisfied(cell(X,Y));is_lighted(cell(X,Y))).
+
+% Choosing the puzzle
 choose_nth1_puzzle(Index):-
 	assert_nth1_puzzle(Index),
 	clear_grid.
@@ -12,7 +34,6 @@ print_grid:-
 	between(1, Columns, X),
 	(X =:= 1 -> nl; true),
 	\+ print_cell(X,Y); true.
-	
 
 print_cell(X,Y):-
 	wall_num(X,Y,Z),ansi_format([bg(white),fg(black)],Z,[]);
@@ -21,6 +42,7 @@ print_cell(X,Y):-
 	not_light(X,Y),ansi_format([fg(magenta)],'.',[]);
 	ansi_format([fg(cyan)],'•',[]).
 
+%get adjacent cells of a given cell
 adjacent_cells(cell(Row, Col), Cells4) :-
 	Cells0 = [],
 	size(X, Y),
@@ -107,14 +129,12 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 		((wall(X4, Y4);is_lighted(cell(X4,Y4))) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
 		Cells4 = Cells3).
 
-
-
-% Get all the wall_num cell
+% Solve the grid
 solve :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
 	Cells \= [] -> (set_light(Cells),solve);(print_grid,!).
 
-% set the light of the cells
+% Set the light to the satisfied wall num
 set_light([]):-!.
 set_light([cell(X,Y)|Rest]) :-
 	wall_num(X,Y,N),
