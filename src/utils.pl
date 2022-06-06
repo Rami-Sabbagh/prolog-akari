@@ -24,11 +24,11 @@ print_grid :-
 	loop1_print_grid(Xmax,Ymax).
 
 print_cell(X,Y):-
-	wall_num(X,Y,Z),print(Z);
-	wall(X,Y),write('#');
-	light(X,Y),write('*');
-	not_light(X,Y),write('.');
-	write('•').
+	wall_num(X,Y,Z),ansi_format([bg(white),fg(black)],Z,[]);
+	wall(X,Y),ansi_format([bg(white),fg(white)],'#',[]);
+	light(X,Y),ansi_format([fg(yellow)],'*',[]);
+	not_light(X,Y),ansi_format([fg(magenta)],'.',[]);
+	ansi_format([fg(cyan)],'•',[]).
 
 adjacent_cells(cell(Row, Col), Cells4) :-
 	Cells0 = [],
