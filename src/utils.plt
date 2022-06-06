@@ -11,7 +11,7 @@
 
 test_puzzle:-
     nl,print_grid,nl,
-    size(Dimension, Dimension).
+    solved.
 
 % -- ENABLE ONE AT A TIME -- %
 

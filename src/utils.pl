@@ -2,27 +2,6 @@
 :- use_module(dataset).
 :- dynamic not_light/2.
 
-% Testing the solution
-test_puzzle :-
-	size(Xmax,Ymax),
-	loop1_test_puzzle(Xmax,Ymax).
-
-loop1_test_puzzle(0,_):-!.
-loop1_test_puzzle(Row,Column):-
-	Row1 is Row-1,
-	loop1_test_puzzle(Row1,Column),
-	loop2_test_puzzle(Row,Column).
-	
-loop2_test_puzzle(_,0):-!.
-loop2_test_puzzle(Row,Column):-
-	Column1 is Column-1,
-	loop2_test_puzzle(Row,Column1),
-	test_cell(Row,Column).
-
-test_cell(X,Y):-
-	(wall(X,Y);light(X,Y))->!;(wall_num(X,Y,_)->
-		is_wall_num_satisfied(cell(X,Y));is_lighted(cell(X,Y))).
-
 % Choosing the puzzle
 choose_nth1_puzzle(Index):-
 	assert_nth1_puzzle(Index),
@@ -150,3 +129,17 @@ assert_adjacent_light([cell(X,Y)|Rest]):-
 clear_grid :-
 	unsolve,
 	print_grid.
+
+% Validating the solution
+
+solved :-
+	size(Columns, Rows),
+	between(1, Rows, Y),
+	between(1, Columns, X),
+	\+ cell_solved(X, Y); true.
+
+cell_solved(X,Y):-
+	wall(X,Y),!;
+	light(X,Y),!;
+	wall_num(X,Y,_),is_wall_num_satisfied(cell(X,Y));
+	is_lighted(cell(X,Y)).
