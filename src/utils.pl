@@ -136,7 +136,7 @@ solved :-
 	size(Columns, Rows),
 	between(1, Rows, Y),
 	between(1, Columns, X),
-	\+ cell_solved(X, Y); true.
+	\+ cell_solved(X, Y) -> !,false; !,true.
 
 cell_solved(X,Y):-
 	wall(X,Y),!;
