@@ -26,7 +26,7 @@ print_grid :-
 print_cell(X,Y):-
 	wall_num(X,Y,Z),ansi_format([bg(white),fg(black)],Z,[]);
 	wall(X,Y),ansi_format([bg(white),fg(white)],'#',[]);
-	light(X,Y),ansi_format([fg(yellow)],'*',[]);
+	light(X,Y),ansi_format([fg(yellow),bold],'*',[]);
 	not_light(X,Y),ansi_format([fg(magenta)],'.',[]);
 	ansi_format([fg(cyan)],'•',[]).
 
