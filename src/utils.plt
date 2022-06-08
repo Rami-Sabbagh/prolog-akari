@@ -16,6 +16,10 @@ test_puzzle:-
     solve,
     solved.
 
+test_puzzle:-
+    nl,print_grid,nl,nl,
+    solved.
+
 % -- ENABLE ONE AT A TIME -- %
 
 % :- include('tests_picked'). % handpicked tests
