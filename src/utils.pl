@@ -8,6 +8,8 @@
 
 :- include(io_utils).
 
+:- dynamic(restricted/2). % restricted(Row, Column) (marked as light not allowed (the dot)).
+
 %get adjacent cells of a given cell
 adjacent_cells(cell(Row, Col), Cells4) :-
 	Cells0 = [],
