@@ -10,24 +10,21 @@ choose_nth1_puzzle(Index):-
 
 print_grid:-
 	size(Columns, Rows),
-	between(1, Rows, R),
-	between(1, Columns, C),
-	(C =:= 1 -> nl; true),
-	\+ print_cell(R,C); true.
+	forall((between(1, Rows, R),between(1, Columns, C)),print_cell(R,C)).
 
 print_cell(R,C):-
+	(C =:= 1 -> nl; true),
 	wall_num(R,C,Z),ansi_format([bg(white),fg(black)],Z,[]);
 	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
 	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
 	not_light(R,C),ansi_format([fg(magenta)],'•',[]);
+	is_lighted(cell(R,C)),ansi_format([fg(black)],'•',[]);
 	ansi_format([fg(cyan)],'•',[]).
 
 % Check double agents
 no_double_light :-
 	size(Columns, Rows),
-	between(1, Rows, R),
-	between(1, Columns, C),
-	\+ check_double(R,C) -> !,false; !,true.
+	forall((between(1, Rows, R),between(1, Columns, C)),check_double(R,C)).
 
 check_double(X,Y) :-
 	(wall(X,Y);light(X,Y))->true;
@@ -141,11 +138,9 @@ iterate_solve(Cnt):-
 
 light_rest:-
 	size(Columns, Rows),
-	between(1, Rows, Y),
-	between(1, Columns, X),
-	\+ check(X,Y) -> !,false; !,true.
+	forall((between(1, Rows, R),between(1, Columns, C)),check_cell(R,C)).
 
-check(X,Y):-
+check_cell(X,Y):-
 	(is_lighted(cell(X,Y));wall(X,Y);not_light(X,Y))->true;assert(light(X,Y)).
 
 satisfy_wall_nums(Cnt) :-
@@ -191,11 +186,9 @@ clear_grid :-
 % Validating the solution
 
 solved :-
-	no_double_light,(
+	no_double_light,
 	size(Columns, Rows),
-	between(1, Rows, Y),
-	between(1, Columns, X),
-	\+ cell_solved(X, Y) -> !,false; !,true).
+	forall((between(1, Rows, R),between(1, Columns, C)),cell_solved(R,C)).
 
 cell_solved(X,Y):-
 	wall(X,Y),!;
