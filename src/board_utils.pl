@@ -3,6 +3,8 @@
     reset_level/0 % unloads the whole level
 ]).
 
+:- use_module(board).
+
 unsolve:-
     retractall(light(_,_)),
     retractall(not_light(_,_)).
