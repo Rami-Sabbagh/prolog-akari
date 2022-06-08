@@ -1,5 +1,13 @@
 :- encoding(utf8).
 
+:- module(io_utils,[
+	choose_nth1_puzzle/1,
+	print_grid/0
+]).
+
+:- use_module(utils).
+:- use_module(board_utils).
+
 choose_nth1_puzzle(Index):-
 	reset_level,
 	assert_nth1_puzzle(Index),
@@ -15,10 +23,9 @@ print_cell(R,C):-
 	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
 	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
 	restricted(R,C),ansi_format([fg(magenta)],'•',[]);
-	is_lighted(cell(R,C)),ansi_format([fg(black)],'•',[]);
+	lighted(cell(R,C)),ansi_format([fg(black)],'•',[]);
 	ansi_format([fg(cyan)],'•',[]).
 
 clear_grid:-
 	unsolve,
 	print_grid.
-

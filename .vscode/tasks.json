@@ -6,7 +6,7 @@
         {
             "label": "swipl: run tests",
             "type": "shell",
-            "command": "swipl -g run_tests -t halt utils.plt",
+            "command": "swipl -g run_tests -t halt tester.pl",
             "options": {
                 "cwd": "${workspaceRoot}/src/"
             },
