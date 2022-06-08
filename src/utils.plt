@@ -27,5 +27,4 @@ test_puzzle:-
 % :- include('tests_full'). % 2,756 tests
 :- include('tests_failed'). % few of the failed tests
 
-
 :- end_tests(utils).

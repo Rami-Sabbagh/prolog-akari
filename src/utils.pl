@@ -2,24 +2,7 @@
 :- use_module(dataset).
 % :- use_module(library(theme/dark)).
 
-% Choosing the puzzle
-choose_nth1_puzzle(Index):-
-	reset_level,
-	assert_nth1_puzzle(Index),
-	clear_grid.
-
-print_grid:-
-	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C)),print_cell(R,C)).
-
-print_cell(R,C):-
-	(C =:= 1 -> nl; true),
-	wall_num(R,C,Z),ansi_format([bg(white),fg(black)],Z,[]);
-	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
-	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
-	not_light(R,C),ansi_format([fg(magenta)],'•',[]);
-	is_lighted(cell(R,C)),ansi_format([fg(black)],'•',[]);
-	ansi_format([fg(cyan)],'•',[]).
+:- include(io_utils).
 
 % Check double agents
 no_double_light :-
@@ -178,11 +161,6 @@ assert_adjacent_no_light([cell(X,Y)|Rest]):-
 	assert(not_light(X,Y)),
 	assert_adjacent_no_light(Rest).
 
-
-clear_grid :-
-	unsolve,
-	print_grid.
-
 % Validating the solution
 
 solved :-
@@ -195,11 +173,3 @@ cell_solved(X,Y):-
 	light(X,Y),!;
 	wall_num(X,Y,_),is_wall_num_satisfied(cell(X,Y));
 	is_lighted(cell(X,Y)).
-
-find_failed_levels:-
-	forall(between(1, 2756, Level),(
-		reset_level,
-		assert_nth1_puzzle(Level),
-		unsolve, solve,
-		solved->true;(title(T),nl,ansi_format([fg(red)],T,[]))
-	)).
