@@ -1,12 +1,12 @@
 :- module(board, [
     title/1, % title(Title)
-    size/2, % size(Columns, Rows)
+    size/2, % size(Rows, Columns)
 
-    wall/2, % wall(Column, Row)
-    wall_num/3, %wall_num(Column, Row, Num)
-    light/2, % light(Column, Row)
+    wall/2, % wall(Row, Column)
+    wall_num/3, %wall_num(Row, Column, Num)
+    light/2, % light(Row, Column)
 
-    restricted/2 % restricted(Column, Row) (marked as light not allowed (the dot)).
+    restricted/2 % restricted(Row, Column) (marked as light not allowed (the dot)).
 ]).
 
 :- 
