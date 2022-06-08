@@ -2,36 +2,14 @@
     assert_nth0_puzzle/1, % assert_nth0_puzzle(Index). % 1826 is the first 20x20 puzzle.
     assert_nth1_puzzle/1, % assert_nth1_puzzle(Index). % 1827 is the first 20x20 puzzle.
     assert_indexed_puzzle/4, % assert_indexed_puzzle(Size, Volume, Book, No).
-    puzzle_exists/4, % puzzle_exists(Size, Volume, Book, No).
-
-    wall/2,
-    wall_num/3,
-    light/2, % use unsolve/0 to unload the predefined solution
-    not_light/2,
-
-    title/1,
-    size/2,
-
-    unsolve/0,
-    reset_level/0
+    puzzle_exists/4 % puzzle_exists(Size, Volume, Book, No).
 ]).
 
-:- dynamic(wall/2),dynamic(wall_num/3),dynamic(light/2),dynamic(title/1),dynamic(size/2),dynamic(not_light/2).
+:- use_module(board).
 
 % ------------------------------------- %
 % BELOW THIS RESIDES THE IMPLEMENTATION %
 % ------------------------------------- %
-
-unsolve:-
-    retractall(light(_,_)),
-    retractall(not_light(_,_)).
-
-reset_level:-
-    unsolve,
-    retractall(wall(_,_)),
-    retractall(wall_num(_,_,_)),
-    retractall(title(_)),
-    retractall(size(_,_)).
 
 dataset(Handle):-
     new_table('packed-data.csv', [

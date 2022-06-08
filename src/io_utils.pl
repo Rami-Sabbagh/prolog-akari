@@ -12,7 +12,7 @@ print_cell(R,C):-
 	wall_num(R,C,Z),ansi_format([bg(white),fg(black)],Z,[]);
 	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
 	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
-	not_light(R,C),ansi_format([fg(magenta)],'•',[]);
+	restricted(R,C),ansi_format([fg(magenta)],'•',[]);
 	is_lighted(cell(R,C)),ansi_format([fg(black)],'•',[]);
 	ansi_format([fg(cyan)],'•',[]).
 

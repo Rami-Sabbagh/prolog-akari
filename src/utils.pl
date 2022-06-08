@@ -1,23 +1,28 @@
 ﻿:- encoding(utf8).
-:- use_module(dataset).
 % :- use_module(library(theme/dark)).
+
+:- use_module(board).
+:- use_module(board_utils).
+:- use_module(dataset).
 
 :- include(io_utils).
 
 % Check double agents
-no_double_light :-
+% (check if an empty cell is lighted by 2 lights or more).
+no_double_light:-
 	size(Columns, Rows),
 	forall((between(1, Rows, R),between(1, Columns, C)),check_double(R,C)).
 
-check_double(X,Y) :-
-	(wall(X,Y);light(X,Y))->true;
-		(column_cells_until_wall(cell(X,Y), Column),
-		row_cells_until_wall(cell(X,Y), Row),
-		count_lights(Column, Cnt1),
-		count_lights(Row, Cnt2),
-		!,
-		Cnt1 =< 1,
-		Cnt2 =< 1).
+check_double(X,Y):- wall(X,Y);light(X,Y).
+
+check_double(X,Y):-
+	(column_cells_until_wall(cell(X,Y), Column),
+	row_cells_until_wall(cell(X,Y), Row),
+	count_lights(Column, Cnt1),
+	count_lights(Row, Cnt2),
+	!,
+	Cnt1 =< 1,
+	Cnt2 =< 1).
 
 %get adjacent cells of a given cell
 adjacent_cells(cell(Row, Col), Cells4) :-
@@ -94,16 +99,16 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 	adjacent_cells(cell(X,Y), Cells),
 	length(Cells,L),
 	nth1(1, Cells, cell(X1,Y1)),
-	((wall(X1, Y1);is_lighted(cell(X1,Y1));light(X1,Y1);not_light(X1,Y1)) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
+	((wall(X1, Y1);is_lighted(cell(X1,Y1));light(X1,Y1);restricted(X1,Y1)) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
 	nth1(2, Cells, cell(X2,Y2)),
-	((wall(X2, Y2);is_lighted(cell(X2,Y2));light(X2,Y2);not_light(X2,Y2)) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
+	((wall(X2, Y2);is_lighted(cell(X2,Y2));light(X2,Y2);restricted(X2,Y2)) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
 	(L>2->
 		(nth1(3, Cells, cell(X3,Y3)),
-		((wall(X3, Y3);is_lighted(cell(X3,Y3));light(X3,Y3);not_light(X3,Y3)) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
+		((wall(X3, Y3);is_lighted(cell(X3,Y3));light(X3,Y3);restricted(X3,Y3)) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
 		Cells3 = Cells2),
 	(L>3->
 		(nth1(4, Cells, cell(X4,Y4)),
-		((wall(X4, Y4);is_lighted(cell(X4,Y4));light(X4,Y4);not_light(X4,Y4)) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
+		((wall(X4, Y4);is_lighted(cell(X4,Y4));light(X4,Y4);restricted(X4,Y4)) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
 		Cells4 = Cells3).
 
 % Solve the grid
@@ -124,7 +129,7 @@ light_rest:-
 	forall((between(1, Rows, R),between(1, Columns, C)),check_cell(R,C)).
 
 check_cell(X,Y):-
-	(is_lighted(cell(X,Y));wall(X,Y);not_light(X,Y))->true;assert(light(X,Y)).
+	(is_lighted(cell(X,Y));wall(X,Y);restricted(X,Y))->true;assert(light(X,Y)).
 
 satisfy_wall_nums(Cnt) :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
@@ -153,13 +158,13 @@ block_satisfied_wall_nums :-
 block_light([]):-!.
 block_light([cell(X,Y)|Rest]) :-
 	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
-	assert_adjacent_no_light(Valid_adjacent_cells),
+	assert_adjacent_restricted(Valid_adjacent_cells),
 	block_light(Rest).
 
-assert_adjacent_no_light([]):-!.
-assert_adjacent_no_light([cell(X,Y)|Rest]):-
-	assert(not_light(X,Y)),
-	assert_adjacent_no_light(Rest).
+assert_adjacent_restricted([]):-!.
+assert_adjacent_restricted([cell(X,Y)|Rest]):-
+	assert(restricted(X,Y)),
+	assert_adjacent_restricted(Rest).
 
 % Validating the solution
 
