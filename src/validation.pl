@@ -63,7 +63,6 @@ double_light(R1, C1, R2, C2):-
 %---------------------%
 
 light_count_correct:-
-    size(Rows, Columns),
     \+ (
         wall_num(R, C, N),
         findall([RA,CA],(
