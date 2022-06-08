@@ -4,25 +4,9 @@
 :- use_module(board).
 :- use_module(board_utils).
 :- use_module(dataset).
+:- use_module(validation).
 
 :- include(io_utils).
-
-% Check double agents
-% (check if an empty cell is lighted by 2 lights or more).
-no_double_light:-
-	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C)),check_double(R,C)).
-
-check_double(X,Y):- wall(X,Y);light(X,Y).
-
-check_double(X,Y):-
-	(column_cells_until_wall(cell(X,Y), Column),
-	row_cells_until_wall(cell(X,Y), Row),
-	count_lights(Column, Cnt1),
-	count_lights(Row, Cnt2),
-	!,
-	Cnt1 =< 1,
-	Cnt2 =< 1).
 
 %get adjacent cells of a given cell
 adjacent_cells(cell(Row, Col), Cells4) :-
@@ -165,16 +149,3 @@ assert_adjacent_restricted([]):-!.
 assert_adjacent_restricted([cell(X,Y)|Rest]):-
 	assert(restricted(X,Y)),
 	assert_adjacent_restricted(Rest).
-
-% Validating the solution
-
-solved :-
-	no_double_light,
-	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C)),cell_solved(R,C)).
-
-cell_solved(X,Y):-
-	wall(X,Y),!;
-	light(X,Y),!;
-	wall_num(X,Y,_),is_wall_num_satisfied(cell(X,Y));
-	is_lighted(cell(X,Y)).

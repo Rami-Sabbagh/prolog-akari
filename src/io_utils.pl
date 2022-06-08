@@ -1,3 +1,5 @@
+:- encoding(utf8).
+
 choose_nth1_puzzle(Index):-
 	reset_level,
 	assert_nth1_puzzle(Index),

@@ -1,17 +1,13 @@
-% :- module(validation, [
-
-% ]).
+:- module(validation, [
+    solved/0
+]).
 
 :- use_module(board).
-:- use_module(board_utils).
-:- use_module(dataset).
 
-:- reset_level,assert_nth0_puzzle(0).
-
-% solved:-
-%     all_cells_lighted,
-%     no_double_light,
-%     light_count_correct.
+solved:-
+    all_cells_lighted,
+    no_double_light,
+    light_count_correct.
 
 %-------------------%
 % all_cells_lighted %
@@ -30,10 +26,37 @@ lighted(R, C):-
 % no_double_light %
 %-----------------%
 
+no_double_light:-
+    \+ double_light(_,_,_,_).
+
+double_light(R1, C1, R2, C2):-
+    light(R1, C1),
+    light(R2, C2),
+    (C1 \= C2; R1 \= R2),
+    reachable(R1, C1, R2, C2).
 
 %---------------------%
 % light_count_correct %
 %---------------------%
+
+light_count_correct:-
+    size(Rows, Columns),
+    \+ (
+        wall_num(R, C, N),
+        findall([RA,CA],(
+            adjacent_cell(R,C, RA,CA),
+            light(RA,CA),
+            between(1, Rows, RA),
+            between(1, Columns, CA)
+        ), Adj),
+        sort(Adj, AdjSet), % remove duplicates (make it a set)
+        \+ length(AdjSet, N)
+    ).
+
+adjacent_cell(R1,C1, R2,C2):- R2 is R1 + 1, C2 is C1.
+adjacent_cell(R1,C1, R2,C2):- R2 is R1 - 1, C2 is C1.
+adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 + 1.
+adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 - 1.
 
 %-----------%
 % Utilities %
@@ -41,34 +64,20 @@ lighted(R, C):-
 
 between_unorded(A, B, V):- between(A, B, V);between(B, A, V).
 
-% unreachable(R1,C1, R2,C2):-
-%     size(Rows, Columns),
-
-%     (R1 = R2; C1 = C2),
-
-%     between(1, Rows, R1),
-%     between(1, Columns, C1),
-
-%     between(1, Rows, R2),
-%     between(1, Columns, C2),
-
-%     between_unorded(R1, R2, R),
-%     between_unorded(C1, C2, C),
-%     wall(R, C).
-
 reachable(R1,C1, R2,C2):-
     size(Rows, Columns),
-
     (R1 = R2; C1 = C2),
 
-    between(1, Rows, R1),
-    between(1, Columns, C1),
+    \+ (
+        between(1, Rows, R1),
+        between(1, Columns, C1),
 
-    between(1, Rows, R2),
-    between(1, Columns, C2),
+        between(1, Rows, R2),
+        between(1, Columns, C2),
+        between_unorded(R1, R2, R),
+        between_unorded(C1, C2, C),
 
-    between_unorded(R1, R2, R),
-    between_unorded(C1, C2, C),
-    \+ wall(R, C).
+        wall(R, C)
+    ).
 
 
