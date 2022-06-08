@@ -5,9 +5,32 @@
 :- use_module(board).
 
 solved:-
+    valid_board,
     all_cells_lighted,
     no_double_light,
     light_count_correct.
+
+%-------------%
+% valid_board %
+%-------------%
+
+valid_board:-
+    \+ invalid_board.
+
+invalid_board:-
+    detached_wall_num;light_over_wall;cell_out_of_bound.
+
+detached_wall_num:-
+    wall_num(R,C,_),
+    \+ wall(R,C).
+
+light_over_wall:-
+    light(R,C),wall(R,C).
+
+cell_out_of_bound:-
+    size(Rows, Columns),
+    (light(R,C);wall(R,C);wall_num(R,C,_)),
+    \+ (between(1,Rows,R),between(1,Columns,C)).
 
 %-------------------%
 % all_cells_lighted %
