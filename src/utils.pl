@@ -195,3 +195,11 @@ cell_solved(X,Y):-
 	light(X,Y),!;
 	wall_num(X,Y,_),is_wall_num_satisfied(cell(X,Y));
 	is_lighted(cell(X,Y)).
+
+find_failed_levels:-
+	forall(between(1, 2756, Level),(
+		reset_level,
+		assert_nth1_puzzle(Level),
+		unsolve, solve,
+		solved->true;(title(T),nl,ansi_format([fg(red)],T,[]))
+	)).
