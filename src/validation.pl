@@ -68,9 +68,7 @@ light_count_correct:-
         wall_num(R, C, N),
         findall([RA,CA],(
             adjacent_cell(R,C, RA,CA),
-            light(RA,CA),
-            between(1, Rows, RA),
-            between(1, Columns, CA)
+            light(RA,CA)
         ), Adj),
         sort(Adj, AdjSet), % remove duplicates (make it a set)
         \+ length(AdjSet, N)
