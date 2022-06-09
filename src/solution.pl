@@ -3,6 +3,7 @@
 ]).
 
 :- use_module(board).
+:- use_module(utils).
 
 %get adjacent cells of a given cell
 adjacent_cells(cell(Row, Col), Cells4) :-
@@ -57,13 +58,13 @@ count_lights([], 0).
 count_lights([cell(X,Y)|Cells], Cnt) :-
 	light(X, Y) -> count_lights(Cells, Cnt2), Cnt is Cnt2 + 1; count_lights(Cells, Cnt).
 
-is_lighted(cell(X,Y)) :-
-	column_cells_until_wall(cell(X,Y), Column),
-	row_cells_until_wall(cell(X,Y), Row),
-	append(Column, Row, Cells),
-	count_lights(Cells, Cnt),
-	!,
-	Cnt > 0.
+% is_lighted(cell(X,Y)) :-
+% 	column_cells_until_wall(cell(X,Y), Column),
+% 	row_cells_until_wall(cell(X,Y), Row),
+% 	append(Column, Row, Cells),
+% 	count_lights(Cells, Cnt),
+% 	!,
+% 	Cnt > 0.
 
 % Check if the given wall num has the right light count around it
 is_wall_num_satisfied(cell(X,Y)) :-
@@ -78,16 +79,16 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 	adjacent_cells(cell(X,Y), Cells),
 	length(Cells,L),
 	nth1(1, Cells, cell(X1,Y1)),
-	((wall(X1, Y1);is_lighted(cell(X1,Y1));light(X1,Y1);restricted(X1,Y1)) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
+	((wall(X1, Y1);lighted(X1,Y1);light(X1,Y1);restricted(X1,Y1)) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
 	nth1(2, Cells, cell(X2,Y2)),
-	((wall(X2, Y2);is_lighted(cell(X2,Y2));light(X2,Y2);restricted(X2,Y2)) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
+	((wall(X2, Y2);lighted(X2,Y2);light(X2,Y2);restricted(X2,Y2)) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
 	(L>2->
 		(nth1(3, Cells, cell(X3,Y3)),
-		((wall(X3, Y3);is_lighted(cell(X3,Y3));light(X3,Y3);restricted(X3,Y3)) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
+		((wall(X3, Y3);lighted(X3,Y3);light(X3,Y3);restricted(X3,Y3)) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
 		Cells3 = Cells2),
 	(L>3->
 		(nth1(4, Cells, cell(X4,Y4)),
-		((wall(X4, Y4);is_lighted(cell(X4,Y4));light(X4,Y4);restricted(X4,Y4)) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
+		((wall(X4, Y4);lighted(X4,Y4);light(X4,Y4);restricted(X4,Y4)) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
 		Cells4 = Cells3).
 
 % Solve the grid
@@ -108,7 +109,7 @@ light_rest:-
 	forall((between(1, Rows, R),between(1, Columns, C)),check_cell(R,C)).
 
 check_cell(X,Y):-
-	(is_lighted(cell(X,Y));wall(X,Y);restricted(X,Y))->true;assert(light(X,Y)).
+	(lighted(X,Y);wall(X,Y);restricted(X,Y))->true;assert(light(X,Y)).
 
 satisfy_wall_nums(Cnt) :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
