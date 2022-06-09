@@ -6,6 +6,7 @@
 ]).
 
 :- use_module(utils).
+:- use_module(board).
 :- use_module(board_utils).
 
 choose_nth1_puzzle(Index):-
