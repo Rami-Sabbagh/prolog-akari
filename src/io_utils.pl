@@ -24,7 +24,7 @@ print_cell(R,C):-
 	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
 	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
 	restricted(R,C),ansi_format([fg(magenta)],'•',[]);
-	lighted(cell(R,C)),ansi_format([fg(black)],'•',[]);
+	lighted(R,C),ansi_format([fg(black)],'•',[]);
 	ansi_format([fg(cyan)],'•',[]).
 
 clear_grid:-
