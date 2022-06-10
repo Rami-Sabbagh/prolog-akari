@@ -58,14 +58,6 @@ count_lights([], 0).
 count_lights([cell(X,Y)|Cells], Cnt) :-
 	light(X, Y) -> count_lights(Cells, Cnt2), Cnt is Cnt2 + 1; count_lights(Cells, Cnt).
 
-% is_lighted(cell(X,Y)) :-
-% 	column_cells_until_wall(cell(X,Y), Column),
-% 	row_cells_until_wall(cell(X,Y), Row),
-% 	append(Column, Row, Cells),
-% 	count_lights(Cells, Cnt),
-% 	!,
-% 	Cnt > 0.
-
 % Check if the given wall num has the right light count around it
 is_wall_num_satisfied(cell(X,Y)) :-
 	adjacent_cells(cell(X,Y), Cells),
@@ -94,22 +86,83 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 % Solve the grid
 solve :-
 	iterate_solve(5),
+	light_restricted,
 	light_rest.
+
+light_restricted:-
+	forall((restricted(X,Y),\+lighted(X,Y)),random_light(X,Y)).
+
+random_light(R,C):-
+	row_cells_until_wall(cell(R,C), Rows),
+	column_cells_until_wall(cell(R,C), Columns),
+	append(Rows,Columns,Cells),
+	assert_random_light(Cells).
+
+assert_random_light([]):-!.
+assert_random_light([cell(X,Y)|Rest]):-
+	(restricted(X,Y);lighted(X,Y))->assert_random_light(Rest);assert(light(X,Y)).
+
 
 iterate_solve(0).
 iterate_solve(Cnt):-
 	Cnt > 0,
+	block_numbers,
 	satisfy_wall_nums(5),
 	block_satisfied_wall_nums,
+	light_isolated,
 	Cnt1 is Cnt-1,
 	iterate_solve(Cnt1).
 
+block_numbers:-
+	findall(wall_num(X,Y,N),(wall_num(X,Y,N),\+is_wall_num_satisfied(cell(X,Y))),Walls),
+	block_numbers(Walls).
+
+block_numbers([]):-!.
+block_numbers([wall_num(X,Y,N)|Rest]):-
+	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
+	length(Valid_adjacent_cells,L),
+	adjacent_cells(cell(X,Y),Adjacent_cells),
+	count_lights(Adjacent_cells,Cnt),
+	N1 is N-Cnt+1,
+	(N1 = L -> block_corners(Valid_adjacent_cells);true),
+	block_numbers(Rest).
+
+block_corners([]):-!.
+block_corners([cell(X,Y)|Rest]):-
+	X1 is X+1, Y1 is Y+1,
+	X2 is X-1, Y2 is Y-1,
+	((member(cell(X1,Y1),Rest))->
+		(assert(restricted(X,Y1)),assert(restricted(X1,Y)));true),
+	((member(cell(X1,Y2),Rest))->
+		(assert(restricted(X,Y2)),assert(restricted(X1,Y)));true),
+	((member(cell(X2,Y1),Rest))->
+		(assert(restricted(X,Y1)),assert(restricted(X2,Y)));true),
+	((member(cell(X2,Y2),Rest))->
+		(assert(restricted(X,Y2)),assert(restricted(X2,Y)));true),
+	block_corners(Rest).
+
+light_isolated:-
+	size(Columns, Rows),
+	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(R,C))
+		,check_isolated(cell(R,C))).
+
+check_isolated(cell(R,C)):-
+	row_cells_until_wall(cell(R,C), Rows),
+	column_cells_until_wall(cell(R,C), Columns),
+	append(Rows,Columns,Cells),
+	count_not_lighted(Cells,Cnt),
+	!,
+	Cnt = 0 -> assert(light(R,C));true.
+
+count_not_lighted([],0):-!.
+count_not_lighted([cell(X,Y)|Rest],Cnt):-
+	count_not_lighted(Rest,Cnt1),
+	(lighted(X,Y) -> Cnt is Cnt1 ; Cnt is Cnt1 + 1).
+
 light_rest:-
 	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C)),check_cell(R,C)).
-
-check_cell(X,Y):-
-	(lighted(X,Y);wall(X,Y);restricted(X,Y))->true;assert(light(X,Y)).
+	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(X,Y),\+restricted(X,Y)),
+		assert(light(R,C))).
 
 satisfy_wall_nums(Cnt) :-
 	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),

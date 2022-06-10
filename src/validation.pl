@@ -39,7 +39,7 @@ cell_out_of_bound:-
 
 all_cells_lighted:-
     size(Rows, Columns),
-    forall((between(1,Rows,R),between(1,Columns,C)), lighted(R,C)).
+    forall((between(1,Rows,R),between(1,Columns,C),\+wall(R,C),\+light(R,C)), lighted(R,C)).
 
 %-----------------%
 % no_double_light %
