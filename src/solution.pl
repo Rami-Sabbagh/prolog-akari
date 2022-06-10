@@ -66,22 +66,12 @@ is_wall_num_satisfied(cell(X,Y)) :-
 	Cnt =:= Num.
 
 % Check the number of valid adjacent cells of a wall with number
-valid_adjacent_cells(cell(X,Y), Cells4) :-
-	Cells0 = [],
-	adjacent_cells(cell(X,Y), Cells),
-	length(Cells,L),
-	nth1(1, Cells, cell(X1,Y1)),
-	((wall(X1, Y1);lighted(X1,Y1);light(X1,Y1);restricted(X1,Y1)) -> Cells1 = Cells0; append(Cells0, [cell(X1, Y1)], Cells1)),
-	nth1(2, Cells, cell(X2,Y2)),
-	((wall(X2, Y2);lighted(X2,Y2);light(X2,Y2);restricted(X2,Y2)) -> Cells2 = Cells1; append(Cells1, [cell(X2, Y2)], Cells2)),
-	(L>2->
-		(nth1(3, Cells, cell(X3,Y3)),
-		((wall(X3, Y3);lighted(X3,Y3);light(X3,Y3);restricted(X3,Y3)) -> Cells3 = Cells2; append(Cells2, [cell(X3, Y3)], Cells3)));
-		Cells3 = Cells2),
-	(L>3->
-		(nth1(4, Cells, cell(X4,Y4)),
-		((wall(X4, Y4);lighted(X4,Y4);light(X4,Y4);restricted(X4,Y4)) -> Cells4 = Cells3; append(Cells3, [cell(X4, Y4)], Cells4)));
-		Cells4 = Cells3).
+valid_adjacent_cells(cell(R,C), Cells) :-
+	findall(cell(RA,CA), (
+		adjacent_cell(R,C, RA, CA),in_board(RA, CA),
+		\+ (wall(RA,CA);lighted(RA,CA);light(RA,CA);restricted(RA,CA))
+	), CellsList),
+	sort(CellsList, Cells).
 
 % Solve the grid
 solve :-
@@ -93,13 +83,13 @@ solve :-
 light_3_diagonal:-
 	forall(wall_num(X,Y,3),light_3_diagonal(cell(X,Y))).
 
-light_3_diagonal(cell(X,Y)):-
-	X1 is X+1, Y1 is Y+1,
-	X2 is X-1, Y2 is Y-1,
-	(wall_num(X1,Y1,1) -> (assert(light(X,Y2)),assert(light(X2,Y)));true),
-	(wall_num(X1,Y2,1) -> (assert(light(X2,Y)),assert(light(X,Y1)));true),
-	(wall_num(X2,Y1,1) -> (assert(light(X,Y2)),assert(light(X1,Y)));true),
-	(wall_num(X2,Y2,1) -> (assert(light(X,Y1)),assert(light(X1,Y)));true).
+light_3_diagonal(cell(R,C)):-
+	R1 is R+1, C1 is C+1,
+	R2 is R-1, C2 is C-1,
+	(wall_num(R1,C1,1) -> (assert(light(R,C2)),assert(light(R2,C)));true),
+	(wall_num(R1,C2,1) -> (assert(light(R2,C)),assert(light(R,C1)));true),
+	(wall_num(R2,C1,1) -> (assert(light(R,C2)),assert(light(R1,C)));true),
+	(wall_num(R2,C2,1) -> (assert(light(R,C1)),assert(light(R1,C)));true).
 
 light_restricted:-
 	forall((restricted(X,Y),\+lighted(X,Y)),random_light(X,Y)).
