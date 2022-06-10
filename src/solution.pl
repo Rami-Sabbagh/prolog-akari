@@ -109,6 +109,7 @@ iterate_solve(Cnt):-
 	block_numbers,
 	satisfy_wall_nums(5),
 	block_satisfied_wall_nums,
+	light_restricted_isolated,
 	light_isolated,
 	Cnt1 is Cnt-1,
 	iterate_solve(Cnt1).
@@ -156,6 +157,24 @@ check_isolated(cell(R,C)):-
 
 count_not_lighted([],0):-!.
 count_not_lighted([cell(X,Y)|Rest],Cnt):-
+	count_not_lighted(Rest,Cnt1),
+	(lighted(X,Y) -> Cnt is Cnt1 ; Cnt is Cnt1 + 1).
+
+light_restricted_isolated:-
+	size(Columns, Rows),
+	forall((between(1, Rows, R),between(1, Columns, C),restricted(R,C))
+		,check_restricted_isolated(cell(R,C))).
+
+check_restricted_isolated(cell(R,C)):-
+	row_cells_until_wall(cell(R,C), Rows),
+	column_cells_until_wall(cell(R,C), Columns),
+	append(Rows,Columns,Cells),
+	count_not_lighted(Cells,Cnt),
+	!,
+	Cnt = 1 -> forall((member(cell(X,Y),Cells),\+ lighted(X,Y)),assert(light(X,Y)));true.
+
+count_restricted_not_lighted([],0):-!.
+count_restricted_not_lighted([cell(X,Y)|Rest],Cnt):-
 	count_not_lighted(Rest,Cnt1),
 	(lighted(X,Y) -> Cnt is Cnt1 ; Cnt is Cnt1 + 1).
 
