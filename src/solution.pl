@@ -85,9 +85,21 @@ valid_adjacent_cells(cell(X,Y), Cells4) :-
 
 % Solve the grid
 solve :-
+	light_3_diagonal,
 	iterate_solve(5),
 	light_restricted,
 	light_rest.
+
+light_3_diagonal:-
+	forall(wall_num(X,Y,3),light_3_diagonal(cell(X,Y))).
+
+light_3_diagonal(cell(X,Y)):-
+	X1 is X+1, Y1 is Y+1,
+	X2 is X-1, Y2 is Y-1,
+	(wall_num(X1,Y1,1) -> (assert(light(X,Y2)),assert(light(X2,Y)));true),
+	(wall_num(X1,Y2,1) -> (assert(light(X2,Y)),assert(light(X,Y1)));true),
+	(wall_num(X2,Y1,1) -> (assert(light(X,Y2)),assert(light(X1,Y)));true),
+	(wall_num(X2,Y2,1) -> (assert(light(X,Y1)),assert(light(X1,Y)));true).
 
 light_restricted:-
 	forall((restricted(X,Y),\+lighted(X,Y)),random_light(X,Y)).
