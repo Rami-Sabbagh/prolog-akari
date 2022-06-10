@@ -1,12 +1,12 @@
 :- module(utils, [
-    between_unorded/3,
+    between_unordered/3,
     reachable/4,
     lighted/2
 ]).
 
 :- use_module(board).
 
-between_unorded(A, B, V):- between(A, B, V);between(B, A, V).
+between_unordered(A, B, V):- between(A, B, V);between(B, A, V).
 
 reachable(R1,C1, R2,C2):-
     size(Rows, Columns),
@@ -18,8 +18,8 @@ reachable(R1,C1, R2,C2):-
 
         between(1, Rows, R2),
         between(1, Columns, C2),
-        between_unorded(R1, R2, R),
-        between_unorded(C1, C2, C),
+        between_unordered(R1, R2, R),
+        between_unordered(C1, C2, C),
 
         wall(R, C)
     ).

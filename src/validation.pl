@@ -73,8 +73,3 @@ adjacent_cell(R1,C1, R2,C2):- R2 is R1 + 1, C2 is C1.
 adjacent_cell(R1,C1, R2,C2):- R2 is R1 - 1, C2 is C1.
 adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 + 1.
 adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 - 1.
-
-%-----------%
-% Utilities %
-%-----------%
-
