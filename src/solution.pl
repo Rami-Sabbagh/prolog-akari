@@ -161,7 +161,7 @@ count_not_lighted([cell(X,Y)|Rest],Cnt):-
 
 light_rest:-
 	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(X,Y),\+restricted(X,Y)),
+	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(R,C),\+restricted(R,C)),
 		assert(light(R,C))).
 
 satisfy_wall_nums(Cnt) :-
