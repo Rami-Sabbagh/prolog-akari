@@ -76,10 +76,61 @@ valid_adjacent_cells(cell(R,C), Cells) :-
 
 % Solve the grid
 solve :-
+	light_two_3s,
 	light_3_diagonal,
 	iterate_solve(5),
 	light_restricted,
 	light_rest.
+
+/* Appropriately light and restrict two 3s that are one cell apart from each other and
+there's no walls between them and between their adjacents cells
+e.g.
+before:
+•••••
+•3•3•
+•••••
+after:
+•••••
+*3*3*
+•••••
+*/
+light_two_3s:-
+	forall(wall_num(X,Y,3),light_two_3s(cell(X,Y))).
+
+light_two_3s(cell(R,C)):-
+	R1 is R+2, C1 is C+2,
+	((wall_num(R,C1,3),check_between(cell(R,C),cell(R,C1)))->restrict_all(cell(R,C),cell(R,C1)); true),
+	((wall_num(R1,C,3),check_between(cell(R,C),cell(R1,C)))->restrict_all(cell(R,C),cell(R,C)); true).
+
+check_between(cell(R,C1),cell(R,C2)):-
+	RT is R-1,RB is R+1,CR is C1+1,
+	C_before is C1-1,C_after is C2+1,
+	\+ wall(RT,CR),\+wall(R,CR),\+wall(RB,CR),
+	assert(light(R,CR)),
+	assert(light(R,C_before)),
+	assert(light(R,C_after)).
+
+check_between(cell(R1,C),cell(R2,C)):-
+	CL is C-1,CR is C+1,RB is R1+1,
+	R_before is R1-1,R_after is R2+1,
+	\+ wall(RB,CL),\+wall(RB,C),\+wall(RB,CR),
+	assert(light(RB,C)),
+	assert(light(R_before,C)),
+	assert(light(R_after,C)).
+
+restrict_all(cell(R,C1),cell(R,C2)):-
+	RT is R-1,RB is R+1,
+	row_cells_until_wall(cell(RB,C1),CellsB),
+	forall((member(cell(X,Y),CellsB),Y\=C2),assert(restricted(X,Y))),
+	row_cells_until_wall(cell(RT,C1),CellsT),
+	forall((member(cell(X,Y),CellsT),Y\=C2),assert(restricted(X,Y))).
+
+restrict_all(cell(R1,C),cell(R2,C)):-
+	CL is C-1,CR is C+1,
+	column_cells_until_wall(cell(R1,CL),CellsL),
+	forall((member(cell(X,Y),CellsL),X\=R2),assert(restricted(X,Y))),
+	column_cells_until_wall(cell(R1,CR),CellsR),
+	forall((member(cell(X,Y),CellsR),X\=R2),assert(restricted(X,Y))).
 
 /* Light the other two nieghbors of a 3 that is diagonal with a 1
 e.g.
