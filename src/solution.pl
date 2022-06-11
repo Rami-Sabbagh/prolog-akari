@@ -132,6 +132,32 @@ restrict_all(cell(R1,C),cell(R2,C)):-
 	column_cells_until_wall(cell(R1,CR),CellsR),
 	forall((member(cell(X,Y),CellsR),X\=R2),assert(restricted(X,Y))).
 
+/* Light the other nieghbor of a 2 that have three valid adjacent cells and share
+two of them with a 1
+e.g.
+before:
+•2•
+••1
+after:
+*2•
+••1
+*/
+light_2_diagonal:-
+	findall(cell(X,Y),(wall_num(X,Y,2),\+is_wall_num_satisfied(cell(X,Y)),valid_adjacent_cells(cell(X,Y),Cells),length(Cells,3)),Cells),
+	forall(member(cell(X,Y),Cells),light_2_diagonal(cell(X,Y))).
+
+light_2_diagonal(cell(R,C)):-
+	R1 is R+1, C1 is C+1,
+	R2 is R-1, C2 is C-1,
+	((wall_num(R1,C1,1),\+wall(R1,C),\+wall(R,C1)) ->
+		((\+wall(R,C2),assert(light(R,C2)));(\+wall(R2,C),assert(light(R2,C))));true),
+	((wall_num(R1,C2,1),\+wall(R1,C),\+wall(R,C2)) ->
+		((\+wall(R,C1),assert(light(R,C1)));(\+wall(R2,C),assert(light(R2,C))));true),
+	((wall_num(R2,C1,1),\+wall(R2,C),\+wall(R,C1)) ->
+		((\+wall(R,C2),assert(light(R,C2)));(\+wall(R1,C),assert(light(R1,C))));true),
+	((wall_num(R2,C2,1),\+wall(R2,C),\+wall(R,C2)) ->
+		((\+wall(R,C1),assert(light(R,C1)));(\+wall(R1,C),assert(light(R1,C))));true).
+
 /* Light the other two nieghbors of a 3 that is diagonal with a 1
 e.g.
 before:
@@ -178,6 +204,7 @@ iterate_solve(Cnt):-
 	block_satisfied_wall_nums,
 	light_restricted_isolated,
 	light_isolated,
+	light_2_diagonal,
 	Cnt1 is Cnt-1,
 	iterate_solve(Cnt1).
 
