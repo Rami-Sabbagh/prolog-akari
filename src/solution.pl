@@ -5,7 +5,7 @@
 :- use_module(board).
 :- use_module(utils).
 
-%get adjacent cells of a given cell
+% Get adjacent cells of a given cell
 adjacent_cells(cell(Row, Col), Cells4) :-
 	Cells0 = [],
 	size(X, Y),
@@ -54,6 +54,7 @@ up_cells_until_wall(cell(Row, Col), Cells) :-
 	up_cells_until_wall(cell(Row2, Col), Cells2),
 	(wall(Row2, Col) -> Cells = []; Cells = [cell(Row2,Col) | Cells2]).
 
+% Count lights in the given list of cells
 count_lights([], 0).
 count_lights([cell(X,Y)|Cells], Cnt) :-
 	light(X, Y) -> count_lights(Cells, Cnt2), Cnt is Cnt2 + 1; count_lights(Cells, Cnt).
@@ -90,6 +91,17 @@ solve :-
 	light_restricted,
 	light_rest.
 
+/* Light the other two nieghbors of a 3 that is diagonal with a 1
+e.g.
+before:
+•••
+•3•
+••1
+after:
+•*•
+*3•
+••1
+*/
 light_3_diagonal:-
 	forall(wall_num(X,Y,3),light_3_diagonal(cell(X,Y))).
 
@@ -101,6 +113,8 @@ light_3_diagonal(cell(X,Y)):-
 	(wall_num(X2,Y1,1) -> (assert(light(X,Y2)),assert(light(X1,Y)));true),
 	(wall_num(X2,Y2,1) -> (assert(light(X,Y1)),assert(light(X1,Y)));true).
 
+% light the restricted cells with the first valid
+% cell in their row or column
 light_restricted:-
 	forall((restricted(X,Y),\+lighted(X,Y)),random_light(X,Y)).
 
@@ -114,7 +128,7 @@ assert_random_light([]):-!.
 assert_random_light([cell(X,Y)|Rest]):-
 	(restricted(X,Y);lighted(X,Y))->assert_random_light(Rest);assert(light(X,Y)).
 
-
+% The repeated part of the solution
 iterate_solve(0).
 iterate_solve(Cnt):-
 	Cnt > 0,
@@ -126,6 +140,7 @@ iterate_solve(Cnt):-
 	Cnt1 is Cnt-1,
 	iterate_solve(Cnt1).
 
+% Block the corners of the numbers
 block_numbers:-
 	findall(wall_num(X,Y,N),(wall_num(X,Y,N),\+is_wall_num_satisfied(cell(X,Y))),Walls),
 	block_numbers(Walls).
@@ -154,6 +169,7 @@ block_corners([cell(X,Y)|Rest]):-
 		(assert(restricted(X,Y2)),assert(restricted(X2,Y)));true),
 	block_corners(Rest).
 
+% Light isolated cells that can't be lighted unless they are light
 light_isolated:-
 	size(Columns, Rows),
 	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(R,C))
@@ -167,11 +183,13 @@ check_isolated(cell(R,C)):-
 	!,
 	Cnt = 0 -> assert(light(R,C));true.
 
+% Count not lighted cells in the given list of cells
 count_not_lighted([],0):-!.
 count_not_lighted([cell(X,Y)|Rest],Cnt):-
 	count_not_lighted(Rest,Cnt1),
 	((lighted(X,Y);restricted(X,Y)) -> Cnt is Cnt1 ; Cnt is Cnt1 + 1).
 
+% Light restricted cells that have only one not lighted cell in their row and column
 light_restricted_isolated:-
 	size(Columns, Rows),
 	forall((between(1, Rows, R),between(1, Columns, C),restricted(R,C),\+lighted(R,C))
@@ -185,6 +203,7 @@ check_restricted_isolated(cell(R,C)):-
 	!,
 	Cnt = 1 -> forall((member(cell(X,Y),Cells),\+ lighted(X,Y),\+ restricted(X,Y)),assert(light(X,Y)));true.
 
+% Light every not lighted cell in the board
 light_rest:-
 	size(Columns, Rows),
 	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(R,C),\+restricted(R,C)),
@@ -210,6 +229,7 @@ assert_adjacent_light([cell(X,Y)|Rest]):-
 	assert(light(X,Y)),
 	assert_adjacent_light(Rest).
 
+% Block the not lighted cells in the adjacent of a satisfied wall num
 block_satisfied_wall_nums :-
 	findall(cell(X,Y),(wall_num(X, Y, _),is_wall_num_satisfied(cell(X,Y))), Cells),
 	(Cells \= []) -> block_light(Cells);!.
