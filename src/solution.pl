@@ -181,19 +181,34 @@ light_3_diagonal(cell(R,C)):-
 	(wall_num(R2,C2,1) -> (assert(light(R,C1)),assert(light(R1,C)));true).
 
 % light the restricted cells with the first valid
-% cell in their row or column
+% cell in their row or column that doesn't break
+% the level
 light_restricted:-
-	forall((restricted(X,Y),\+lighted(X,Y)),random_light(X,Y)).
+	forall((restricted(X,Y),\+lighted(X,Y)),find_restricted(X,Y)).
 
-random_light(R,C):-
+find_restricted(R,C):-
 	row_cells_until_wall(cell(R,C), Rows),
 	column_cells_until_wall(cell(R,C), Columns),
 	append(Rows,Columns,Cells),
-	assert_random_light(Cells).
+	random_light(Cells).
 
-assert_random_light([]):-!.
-assert_random_light([cell(X,Y)|Rest]):-
-	(restricted(X,Y);lighted(X,Y))->assert_random_light(Rest);assert(light(X,Y)).
+random_light([]):-!.
+random_light([cell(X,Y)|Rest]):-
+	(restricted(X,Y);lighted(X,Y))->random_light(Rest);(assert_random_light(cell(X,Y))->true;random_light(Rest)).
+
+assert_random_light(cell(R,C)):-
+	assert(light(R,C)),
+	forall((restricted(X,Y),\+lighted(X,Y)),check_availability(cell(X,Y)))->
+		true;(retract(light(R,C)),false).
+
+check_availability(cell(X,Y)):-
+	row_cells_until_wall(cell(X,Y), Rows),
+	column_cells_until_wall(cell(X,Y), Columns),
+	append(Rows,Columns,Cells),
+	count_not_lighted(Cells,Cnt),
+	!,
+	Cnt > 0.
+
 
 % The repeated part of the solution
 iterate_solve(0).
