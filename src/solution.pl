@@ -161,8 +161,7 @@ block_corners([cell(X,Y)|Rest]):-
 
 % Light isolated cells that can't be lighted unless they are light
 light_isolated:-
-	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(R,C))
+	forall((in_board(R,C),\+wall(R,C),\+light(R,C),\+lighted(R,C))
 		,check_isolated(cell(R,C))).
 
 check_isolated(cell(R,C)):-
@@ -181,8 +180,7 @@ count_not_lighted([cell(X,Y)|Rest],Cnt):-
 
 % Light restricted cells that have only one not lighted cell in their row and column
 light_restricted_isolated:-
-	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C),restricted(R,C),\+lighted(R,C))
+	forall((in_board(R,C),restricted(R,C),\+lighted(R,C))
 		,check_restricted_isolated(cell(R,C))).
 
 check_restricted_isolated(cell(R,C)):-
@@ -195,8 +193,7 @@ check_restricted_isolated(cell(R,C)):-
 
 % Light every not lighted cell in the board
 light_rest:-
-	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C),\+wall(R,C),\+light(R,C),\+lighted(R,C),\+restricted(R,C)),
+	forall((in_board(R,C),\+wall(R,C),\+light(R,C),\+lighted(R,C),\+restricted(R,C)),
 		assert(light(R,C))).
 
 satisfy_wall_nums(Cnt) :-
