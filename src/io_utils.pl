@@ -8,6 +8,7 @@
 :- use_module(utils).
 :- use_module(board).
 :- use_module(board_utils).
+:- use_module(dataset).
 
 choose_nth1_puzzle(Index):-
 	reset_level,

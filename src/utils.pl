@@ -1,23 +1,27 @@
 :- module(utils, [
     between_unordered/3,
+    in_board/2, % tests if the cell is in board, can be also used for iterating over all cells.
     reachable/4,
-    lighted/2
+    lighted/2,
+    adjacent_cell/4
 ]).
 
 :- use_module(board).
 
 between_unordered(A, B, V):- between(A, B, V);between(B, A, V).
 
+in_board(R, C):-
+    size(Columns, Rows),
+    between(1, Rows, R),
+    between(1, Columns, C).
+
 reachable(R1,C1, R2,C2):-
-    size(Rows, Columns),
     (R1 = R2; C1 = C2),
 
     \+ (
-        between(1, Rows, R1),
-        between(1, Columns, C1),
+        in_board(R1, C1),
+        in_board(R2, C2),
 
-        between(1, Rows, R2),
-        between(1, Columns, C2),
         between_unordered(R1, R2, R),
         between_unordered(C1, C2, C),
 
@@ -28,3 +32,8 @@ lighted(R, C):- wall(R,C);light(R,C).
 lighted(R, C):-
     light(RL, CL),
     reachable(R,C, RL, CL).
+
+adjacent_cell(R1,C1, R2,C2):- R2 is R1 + 1, C2 is C1.
+adjacent_cell(R1,C1, R2,C2):- R2 is R1 - 1, C2 is C1.
+adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 + 1.
+adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 - 1.
