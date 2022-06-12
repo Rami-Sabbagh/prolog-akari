@@ -20,13 +20,9 @@
     dynamic(light/2),
     dynamic(restricted/2).
 
-:- use_module(io_utils).
-
 create_light(R,C):-
     assertz(light(R,C), Ref),
     (true;erase(Ref),fail),
-    % nl,print_grid,nl,
-    % trace,
     true.
 
 mark_restricted(R,C):-
