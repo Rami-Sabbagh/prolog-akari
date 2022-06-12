@@ -79,8 +79,66 @@ solve :-
 	light_two_3s,
 	light_3_diagonal,
 	iterate_solve(5),
-	light_restricted,
+	backtracking,
 	light_rest.
+
+
+backtracking:-
+	findall(cell(X,Y),(wall_num(X,Y,_),\+is_wall_num_satisfied(cell(X,Y))),Cells),
+	Cells\=[] ->bk_not_satisfied(Cells);light_restricted.
+
+bk_not_satisfied([]):-!.
+bk_not_satisfied([cell(X,Y)|_]):-
+	valid_adjacent_cells(cell(X,Y),Cells),
+	Cells\=[],
+	bk_satisfy(Cells).
+
+bk_satisfy([]):-!.
+bk_satisfy([cell(X,Y)|Rest]):-
+	assert(light(X,Y)),
+	iterate_solve(5),
+	backtracking->true;(retract(light(X,Y)),bk_satisfy(Rest)).
+
+/* Appropriately light and restrict two 2x that are one cell apart from each other and there's no
+walls between them and between their adjacents cells and have walls on the other side
+e.g.
+before:
+•••••
+#2•2#
+•••••
+after:
+•••••
+#2*2#
+•••••
+*/
+light_two_2s:-
+	forall(wall_num(X,Y,2),light_two_2s(cell(X,Y))).
+
+light_two_2s(cell(R,C)):-
+	R1 is R+2, C1 is C+2,
+	((wall_num(R,C1,2),check_between_2(cell(R,C),cell(R,C1)))->restrict_all(cell(R,C),cell(R,C1)); true),
+	((wall_num(R1,C,2),check_between_2(cell(R,C),cell(R1,C)))->restrict_all(cell(R,C),cell(R,C)); true).
+
+check_between_2(cell(R,C1),cell(R,C2)):-
+	RT is R-1,RB is R+1,CR is C1+1,
+	C_before is C1-1,C_after is C2+1,
+	\+ wall(RT,CR),\+wall(R,CR),\+wall(RB,CR),
+	wall(R,C_before),wall(R,C_after),
+	assert(light(R,CR)).
+
+check_between_2(cell(R1,C),cell(R2,C)):-
+	CL is C-1,CR is C+1,RB is R1+1,
+	R_before is R1-1,R_after is R2+1,
+	\+ wall(RB,CL),\+wall(RB,C),\+wall(RB,CR),
+	wall(R_before,C),wall(R_after,C),
+	assert(light(RB,C)).
+
+restrict_all_2(cell(R,C1),cell(R,C2)):-
+	RT is R-1,RB is R+1,
+	row_cells_until_wall(cell(RB,C1),CellsB),
+	forall((member(cell(X,Y),CellsB),Y\=C2),assert(restricted(X,Y))),
+	row_cells_until_wall(cell(RT,C1),CellsT),
+	forall((member(cell(X,Y),CellsT),Y\=C2),assert(restricted(X,Y))).
 
 /* Appropriately light and restrict two 3s that are one cell apart from each other and
 there's no walls between them and between their adjacents cells
@@ -211,15 +269,16 @@ check_availability(cell(X,Y)):-
 
 
 % The repeated part of the solution
-iterate_solve(0).
+iterate_solve(0):-!.
 iterate_solve(Cnt):-
 	Cnt > 0,
 	block_numbers,
-	satisfy_wall_nums(5),
 	block_satisfied_wall_nums,
+	satisfy_wall_nums(5),
 	light_restricted_isolated,
 	light_isolated,
 	light_2_diagonal,
+	light_two_2s,
 	Cnt1 is Cnt-1,
 	iterate_solve(Cnt1).
 
