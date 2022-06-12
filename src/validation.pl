@@ -1,5 +1,6 @@
 :- module(validation, [
-    solved/0
+    solved/0,
+    light_count_correct/0
 ]).
 
 :- use_module(board).
