@@ -3,7 +3,9 @@
     in_board/2, % tests if the cell is in board, can be also used for iterating over all cells.
     reachable/4,
     lighted/2,
-    adjacent_cell/4
+    valid/2, % valid for placing a light
+    adjacent_cell/4,
+    adjacent_cells/3
 ]).
 
 :- use_module(board).
@@ -33,7 +35,14 @@ lighted(R, C):-
     light(RL, CL),
     reachable(R,C, RL, CL).
 
+valid(R, C):-
+    in_board(R,C),
+    \+ (lighted(R,C);restricted(R,C);wall(R,C)).
+
 adjacent_cell(R1,C1, R2,C2):- R2 is R1 + 1, C2 is C1.
 adjacent_cell(R1,C1, R2,C2):- R2 is R1 - 1, C2 is C1.
 adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 + 1.
 adjacent_cell(R1,C1, R2,C2):- R2 is R1, C2 is C1 - 1.
+
+adjacent_cells(R,C, Cells):-
+    findall([RA,CA], adjacent_cell(R,C, RA,CA), Cells).
