@@ -18,17 +18,17 @@ in_board(R, C):-
 reachable(R1,C1, R2,C2):-
     (R1 = R2; C1 = C2),
 
-    \+ (
-        in_board(R1, C1),
-        in_board(R2, C2),
+    in_board(R1, C1),
+    in_board(R2, C2),
 
+    \+ (
         between_unordered(R1, R2, R),
         between_unordered(C1, C2, C),
 
         wall(R, C)
     ).
 
-lighted(R, C):- wall(R,C);light(R,C).
+lighted(R, C):- wall(R,C);light(R,C);\+in_board(R,C).
 lighted(R, C):-
     light(RL, CL),
     reachable(R,C, RL, CL).
