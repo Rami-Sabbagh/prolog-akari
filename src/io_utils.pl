@@ -16,8 +16,7 @@ choose_nth1_puzzle(Index):-
 	clear_grid.
 
 print_grid:-
-	size(Columns, Rows),
-	forall((between(1, Rows, R),between(1, Columns, C)),print_cell(R,C)).
+	forall(in_board(R,C),print_cell(R,C)).
 
 print_cell(R,C):-
 	(C =:= 1 -> nl; true),
