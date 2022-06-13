@@ -54,11 +54,11 @@ count_lights([cell(X,Y)|Cells], Cnt) :-
 	light(X, Y) -> count_lights(Cells, Cnt2), Cnt is Cnt2 + 1; count_lights(Cells, Cnt).
 
 % Check if the given wall num has the right light count around it
-is_wall_num_satisfied(cell(X,Y)) :-
-	adjacent_cells(cell(X,Y), Cells),
-	count_lights(Cells, Cnt),
-	wall_num(X, Y, Num),
-	Cnt =:= Num.
+is_wall_num_satisfied(cell(R,C)) :-
+	adjacent_cells(cell(R,C), Cells),
+	count_lights(Cells, Count),
+	wall_num(R, C, Num),
+	Count =:= Num.
 
 % Check the number of valid adjacent cells of a wall with number
 valid_adjacent_cells(cell(R,C), Cells) :-
