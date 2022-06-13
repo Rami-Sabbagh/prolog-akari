@@ -20,7 +20,7 @@ print_grid:-
 
 print_cell(R,C):-
 	(C =:= 1 -> nl; true),
-	wall_num(R,C,Z),ansi_format([bg(white),fg(black)],Z,[]);
+	wall_num(R,C,Z),ansi_format([bg(white),fg(black)],'~w',[Z]);
 	wall(R,C),ansi_format([bg(white),fg(white)],'#',[]);
 	light(R,C),ansi_format([fg(yellow),bold],'*',[]);
 	lighted(R,C),ansi_format([fg(black)],'•',[]);
