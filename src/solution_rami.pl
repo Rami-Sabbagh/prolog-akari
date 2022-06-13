@@ -76,22 +76,14 @@ light_with_backtrack:-
 
 seal_satisfied_cells:-
     wall_num(R,C,N),
-    length(Cells,N),
-    findall([RA,CA],(adjacent_cell(R,C,RA,CA),light(RA,CA)),Cells),
+    findall([RA,CA],(adjacent_cell(R,C,RA,CA),light(RA,CA)),Lights),
+    length(Lights,N),
     adjacent_cell(R,C,RA,CA),
     in_board(RA,CA),
-    \+ (light(RA,CA);wall(RA,CA);restricted(RA,CA)),
+    \+ (wall(RA,CA);light(RA,CA);restricted(RA,CA)),
     mark_restricted(RA,CA),
     seal_satisfied_cells
     ;true.
-
-% restrict_around_numbered_cells:-
-%     wall_num(R,C,_),
-%     adjacent_cell(R,C, RA,CA),
-%     valid(RA, CA),
-%     mark_restricted(RA,CA),
-%     restrict_around_numbered_cells
-%     ;true.
 
 % --- --- --- --- --- %
 
