@@ -6,6 +6,7 @@
 :- use_module(board).
 :- use_module(utils).
 
+% complexity: O(N^4) where N is the board dimension.
 solved:-
     valid_board,
     all_cells_lighted,
@@ -16,6 +17,7 @@ solved:-
 % valid_board %
 %-------------%
 
+% complexity: O(N^2).
 valid_board:-
     \+ invalid_board.
 
@@ -30,22 +32,22 @@ light_over_wall:-
     light(R,C),wall(R,C).
 
 cell_out_of_bound:-
-    size(Rows, Columns),
     (light(R,C);wall(R,C);wall_num(R,C,_)),
-    \+ (between(1,Rows,R),between(1,Columns,C)).
+    \+ (in_board(R,C)).
 
 %-------------------%
 % all_cells_lighted %
 %-------------------%
 
+% complexity: O(N^4).
 all_cells_lighted:-
-    size(Rows, Columns),
-    forall((between(1,Rows,R),between(1,Columns,C),\+wall(R,C),\+light(R,C)), lighted(R,C)).
+    forall((in_board(R,C),\+wall(R,C),\+light(R,C)), lighted(R,C)).
 
 %-----------------%
 % no_double_light %
 %-----------------%
 
+% complexity: O(N^2) where N is the lights count.
 no_double_light:-
     \+ double_light(_,_,_,_).
 
@@ -59,6 +61,7 @@ double_light(R1, C1, R2, C2):-
 % light_count_correct %
 %---------------------%
 
+% complexity: O(N) where N is the numbered walls count.
 light_count_correct:-
     \+ (
         wall_num(R, C, N),
