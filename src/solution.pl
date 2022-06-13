@@ -11,42 +11,13 @@ adjacent_cells(cell(R, C), Cells) :-
 
 % Get all cells on the right and left of the given cell,
 % until a wall, or the edge of the board is reached.
-row_cells_until_wall(cell(Row, Col), Cells) :-
-	right_cells_until_wall(cell(Row, Col), Right),
-	left_cells_until_wall(cell(Row, Col), Left),
-	append(Right, Left, Cells).
-
-right_cells_until_wall(cell(_, Col), []) :- size(_, Y), Col >= Y,!.
-right_cells_until_wall(cell(Row, Col), Cells) :-
-	Col2 is Col+1,
-	right_cells_until_wall(cell(Row, Col2), Cells2),
-	(wall(Row, Col2) -> Cells = []; Cells = [cell(Row,Col2) | Cells2]).
-
-left_cells_until_wall(cell(_, Col), []) :- Col =< 1,!.
-left_cells_until_wall(cell(Row, Col), Cells) :-
-	Col2 is Col-1,
-	left_cells_until_wall(cell(Row, Col2), Cells2),
-	(wall(Row, Col2) -> Cells = []; Cells = [cell(Row,Col2) | Cells2]).
-
+row_cells_until_wall(cell(R, C), Cells) :-
+	findall(cell(RT,CT), reachable(row, R,C,RT,CT), Cells).
 
 % Get all cells on the top and bottom of the given cell,
 % until a wall, or the edge of the board is reached.
-column_cells_until_wall(cell(Row, Col), Cells) :-
-	up_cells_until_wall(cell(Row, Col), Up),
-	down_cells_until_wall(cell(Row, Col), Down),
-	append(Up, Down, Cells).
-
-down_cells_until_wall(cell(Row, _), []) :- size(X, _), Row >= X,!.
-down_cells_until_wall(cell(Row, Col), Cells) :-
-	Row2 is Row+1,
-	down_cells_until_wall(cell(Row2, Col), Cells2),
-	(wall(Row2, Col) -> Cells = []; Cells = [cell(Row2,Col) | Cells2]).
-
-up_cells_until_wall(cell(Row, _), []) :- Row =< 1,!.
-up_cells_until_wall(cell(Row, Col), Cells) :-
-	Row2 is Row-1,
-	up_cells_until_wall(cell(Row2, Col), Cells2),
-	(wall(Row2, Col) -> Cells = []; Cells = [cell(Row2,Col) | Cells2]).
+column_cells_until_wall(cell(R, C), Cells) :-
+	findall(cell(RT,CT), reachable(column, R,C,RT,CT), Cells).
 
 % Count lights in the given list of cells
 count_lights([], 0).
