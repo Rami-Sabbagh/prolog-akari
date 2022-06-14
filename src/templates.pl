@@ -29,6 +29,7 @@ apply_templates:- apply_templates([]).
 
 % --- --- --- %
 
+should_restrict([R,C]):- should_restrict(R,C).
 
 should_restrict(R,C):- \+ in_board(R,C).
 should_restrict(R,C):- wall(R,C).
@@ -38,7 +39,7 @@ should_restrict(R,C):- mark_restricted(R,C).
 should_light(R,C):- light(R,C).
 should_light(R,C):- in_board(R,C), create_light(R,C).
 
-should_be_empty(R,C):- \+ wall(R,C).
+should_be_empty(R,C):- \+ (wall(R,C);light(R,C)).
 
 can_be_light(R,C):- light(R,C).
 can_be_light(R,C):- valid(R,C).
@@ -145,7 +146,15 @@ matcher(R,C, shared_2_1_flip_vh):-
 
 % --- --- --- %
 
+matcher(R,C, line_3_h):-
+    wall_num(R,CL,3), C is CL + 1, CR is C + 1,
+    wall_num(R,CR,3), RP is R - 1, RN is R + 1,
+    can_be_light(R,C), should_be_empty(RP,C), should_be_empty(RN,C).
 
+matcher(R,C, line_3_v):-
+    wall_num(RP,C,3), R is RP + 1, RN is R + 1,
+    wall_num(RN,C,3), CP is C - 1, CN is C + 1,
+    can_be_light(R,C), should_be_empty(R,CP), should_be_empty(R,CN).
 
 % --- --- --- %
 
@@ -235,3 +244,35 @@ template(shared_2_1_flip_vh, R,C):-
     RL is R+1, CL is C+1, R1 is R-1, R2 is R-2, C1 is C-1, C2 is C-2,
     light_if_possible(RL,C), light_if_possible(R,CL),
     should_restrict(R2,C1), should_restrict(R1, C2).
+
+% --- --- --- %
+
+template(line_3_h, R,C):-
+    CL1 is C-2, CL2 is C+2,
+    should_light(R,C), should_light(R,CL1), should_light(R,CL2),
+    RP is R-1, RN is R+1,
+    CP is C-1, CN is C+1,
+    findall([RT,CT], (
+        should_be_empty(RP,CP),reachable(left,  RP,CP, RT,CT);
+        should_be_empty(RN,CP),reachable(left,  RN,CP, RT,CT);
+        should_be_empty(RP,CN),reachable(right, RP,CN, RT,CT);
+        should_be_empty(RN,CN),reachable(right, RN,CN, RT,CT)
+    ), SpotsUnsorted),
+    sort(SpotsUnsorted, Spots),
+    maplist(should_restrict, Spots).
+
+template(line_3_v, R,C):-
+    RL1 is R-2, RL2 is R+2,
+    should_light(R,C), should_light(RL1,C), should_light(RL2,C),
+    RP is R-1, RN is R+1,
+    CP is C-1, CN is C+1,
+    findall([RT,CT], (
+        should_be_empty(RP,CP),reachable(up,   RP,CP, RT,CT);
+        should_be_empty(RP,CN),reachable(up,   RP,CN, RT,CT);
+        should_be_empty(RN,CP),reachable(down, RN,CP, RT,CT);
+        should_be_empty(RN,CN),reachable(down, RN,CN, RT,CT)
+    ), SpotsUnsorted),
+    sort(SpotsUnsorted, Spots),
+    maplist(should_restrict, Spots).
+
+% --- --- --- %
