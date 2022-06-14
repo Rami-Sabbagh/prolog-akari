@@ -7,6 +7,7 @@
 
 unsolve:-
     retractall(light(_,_)),
+    retractall(really_lighted(_,_)),
     retractall(restricted(_,_)).
 
 reset_level:-

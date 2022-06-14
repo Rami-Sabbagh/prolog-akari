@@ -1,4 +1,6 @@
 :- module(utils, [
+    create_light/2,
+    spread_lights/0, % used to properly load puzzle's solutions.
     between_unordered/3,
     in_board/2, % tests if the cell is in board, can be also used for iterating over all cells.
     lighted/2,
@@ -26,6 +28,29 @@
 ]).
 
 :- use_module(board).
+
+create_really_lighted([R,C]):-
+    asserta(really_lighted(R,C), Ref),
+    (true;erase(Ref),fail),
+    true.
+
+spread_light(R,C):-
+    create_really_lighted([R,C]),
+    findall([RL,CL], (
+        reachable(R,C, RL,CL), \+ really_lighted(RL,CL)
+    ), List),
+    maplist(create_really_lighted, List).
+
+spread_lights:-
+    forall((light(R,C),\+ really_lighted(R,C)), spread_light(R,C)).
+
+create_light(R,C):-
+    assertz(light(R,C), Ref),
+    spread_light(R,C),
+    (true;erase(Ref),fail),
+    true.
+
+% --- --- --- --- --- %
 
 % complexity: O(1).
 %
@@ -73,14 +98,10 @@ where N is the board dimension.
 reachable(any, R1,C1, R2,C2):- in_board(R1,C1),(reachable(row ,R1,C1, R2,C2);reachable(column, R1,C1, R2,C2)).
 reachable(R1,C1, R2,C2):- reachable(any, R1,C1, R2,C2).
 
-% complexity: O(N^2).
-%
 % checks if a cell is lighted by any light.
 % walls, lights and out-of-bound cells are considered lighted.
+lighted(R, C):- really_lighted(R, C).
 lighted(R, C):- wall(R,C);light(R,C);\+in_board(R,C).
-lighted(R, C):-
-    light(RL, CL),
-    reachable(R,C, RL, CL).
 
 % complexity: O(N^2) when the parameters are pinned.
 %

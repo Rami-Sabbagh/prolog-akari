@@ -6,9 +6,10 @@
     wall_num/3, %wall_num(Row, Column, Num)
     light/2, % light(Row, Column)
 
+    really_lighted/2,
     restricted/2, % restricted(Row, Column) (marked as light not allowed (the dot)).
 
-    create_light/2, % create_light(Row, Column)
+    % create_light/2, % create_light(Row, Column)
     mark_restricted/2 % create_restricted(Row, Column)
 ]).
 
@@ -18,12 +19,8 @@
     dynamic(wall/2), 
     dynamic(wall_num/3), 
     dynamic(light/2),
+    dynamic(really_lighted/2),
     dynamic(restricted/2).
-
-create_light(R,C):-
-    assertz(light(R,C), Ref),
-    (true;erase(Ref),fail),
-    true.
 
 mark_restricted(R,C):-
     assertz(restricted(R,C), Ref),
