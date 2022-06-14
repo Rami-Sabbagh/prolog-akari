@@ -3,15 +3,18 @@
 % ?- [tester].
 % ?- run_tests.
 
-:- begin_tests(utils).
+:- begin_tests(krazydad).
 
+:- use_module(utils).
 :- use_module(dataset).
-:- use_module(solution).
+% :- use_module(solution).
+:- use_module(solution_rami).
 :- use_module(validation).
 
 :- use_module(board_utils).
 
 test_puzzle_untimed:-
+    spread_lights,
     solved,
     unsolve,
     \+ solved,
@@ -19,7 +22,7 @@ test_puzzle_untimed:-
     solved.
 
 % 10 seconds limit
-test_puzzle:- call_with_time_limit(8, test_puzzle_untimed).
+test_puzzle:- call_with_time_limit(3, test_puzzle_untimed).
 
 
 % test_puzzle:-
@@ -33,4 +36,4 @@ test_puzzle:- call_with_time_limit(8, test_puzzle_untimed).
 :- include('tests_full'). % 2,756 tests
 % :- include('tests_failed'). % few of the failed tests
 
-:- end_tests(utils).
+:- end_tests(krazydad).
