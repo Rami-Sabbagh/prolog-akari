@@ -88,9 +88,9 @@ combination(1, n,n,n,y).
 try_light(R,C):- light(R,C).
 try_light(R,C):- valid(R,C),create_light(R,C).
 
-not_light(R,C):- 
-    \+ light(R,C),
-    (wall(R,C) -> true; mark_restricted(R,C)).
+not_light(R,C):- restricted(R,C).
+not_light(R,C):- wall(R,C).
+not_light(R,C):- \+ light(R,C),mark_restricted(R,C).
 
 try_combination(R,C):-
     wall_num(R,C, N),
@@ -165,5 +165,6 @@ light_isolated_restricted:-
             reachable(R,C,R2,C2), valid(R2,C2),
             (R2 \= RL; C2 \= CL)
         )
-    ), L),
-    maplist(create_light, L).
+    ), Lights),
+    sort(Lights, LightsSet), % remove duplicates because they are possible here!
+    maplist(create_light, LightsSet).
