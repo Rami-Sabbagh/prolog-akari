@@ -11,12 +11,16 @@
 
 :- use_module(board_utils).
 
-test_puzzle:-
+test_puzzle_untimed:-
     solved,
     unsolve,
     \+ solved,
     solve,
     solved.
+
+% 10 seconds limit
+test_puzzle:- call_with_time_limit(8, test_puzzle_untimed).
+
 
 % test_puzzle:-
 %     nl,print_grid,nl,nl,
