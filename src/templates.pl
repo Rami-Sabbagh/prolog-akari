@@ -5,9 +5,8 @@
 :- use_module(board).
 :- use_module(utils).
 
-:- use_module(io_utils).
-
 point:- !.
+% :- use_module(io_utils).
 % point:- nl,print_grid,nl,trace.
 
 apply_template([R,C,Template]):-

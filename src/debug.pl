@@ -5,7 +5,7 @@
 :- use_module(board_utils).
 :- use_module(board).
 :- use_module(validation).
-:- use_module(solution_rami).
+:- use_module(solution).
 
 % :- choose_nth1_puzzle(1).
 % :- choose_nth1_puzzle(116).

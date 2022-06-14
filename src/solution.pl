@@ -4,347 +4,168 @@
 
 :- use_module(board).
 :- use_module(utils).
+:- use_module(validation).
 
-% Get adjacent cells of a given cell
-adjacent_cells(cell(R, C), Cells) :-
-	findall(cell(RA,CA), adjacent_cell(R,C, RA,CA), Cells).
+:- use_module(templates).
 
-% Get all cells on the right and left of the given cell,
-% until a wall, or the edge of the board is reached.
-row_cells_until_wall(cell(R, C), Cells) :-
-	findall(cell(RT,CT), reachable(row, R,C,RT,CT), Cells).
+point:- !.
+% :- use_module(io_utils).
+% point:- nl,print_grid,nl,trace.
 
-% Get all cells on the top and bottom of the given cell,
-% until a wall, or the edge of the board is reached.
-column_cells_until_wall(cell(R, C), Cells) :-
-	findall(cell(RT,CT), reachable(column, R,C,RT,CT), Cells).
+solve:-
+    point, apply_templates, !, point,
+    restrict,
+    refresh_lighted, !,
+    light_all_trivials,!, point,
+    light_with_backtrack, 
+    seal_satisfied_cells, point,
+    \+ dead_restricted, point,
+    light_count_correct, point,
+    light_unlighted, point,
+    solved,
+    !.
 
-% Count lights in the given list of cells
-count_lights([], 0).
-count_lights([cell(X,Y)|Cells], Cnt) :-
-	light(X, Y) -> count_lights(Cells, Cnt2), Cnt is Cnt2 + 1; count_lights(Cells, Cnt).
+% --- --- --- --- --- %
 
-% Check if the given wall num has the right light count around it
-is_wall_num_satisfied(cell(R,C)) :-
-	adjacent_cells(cell(R,C), Cells),
-	count_lights(Cells, Count),
-	wall_num(R, C, Num),
-	Count =:= Num.
+restrict:-
+    restrict_0_cells.
 
-% Check the number of valid adjacent cells of a wall with number
-valid_adjacent_cells(cell(R,C), Cells) :-
-	findall(cell(RA,CA), (
-		adjacent_cell(R,C, RA, CA),in_board(RA, CA),
-		\+ (wall(RA,CA);lighted(RA,CA);light(RA,CA);restricted(RA,CA))
-	), CellsList),
-	sort(CellsList, Cells).
+restrict_0_cells:-
+    forall((wall_num(R,C,0), adjacent_cell(R,C, RA,CA)),(
+        in_board(RA,CA),
+        \+ (wall(RA,CA);restricted(RA,CA)),
+        mark_restricted(RA,CA)
+    ;true)),!.
 
-% Solve the grid
-solve :-
-	light_two_3s,
-	light_3_diagonal,
-	iterate_solve(5),
-	backtracking,
-	light_rest.
+% --- --- --- --- --- %
 
+count_lights(Cells, Count):-
+    findall(_, (member([RA,CA],Cells),light(RA,CA)), Lights),
+    length(Lights,Count).
 
-backtracking:-
-	findall(cell(X,Y),(wall_num(X,Y,_),\+is_wall_num_satisfied(cell(X,Y))),Cells),
-	Cells\=[] ->bk_not_satisfied(Cells);light_restricted.
+valid_light_placement(Cells, ValidCells):-
+    findall([R,C], (member([R,C], Cells),valid(R,C)), ValidCells).
 
-bk_not_satisfied([]):-!.
-bk_not_satisfied([cell(X,Y)|_]):-
-	valid_adjacent_cells(cell(X,Y),Cells),
-	Cells\=[],
-	bk_satisfy(Cells).
+create_light([RL, CL]):- valid(RL,CL),create_light(RL, CL).
 
-bk_satisfy([]):-!.
-bk_satisfy([cell(X,Y)|Rest]):-
-	assert(light(X,Y)),
-	iterate_solve(5),
-	backtracking->true;(retract(light(X,Y)),bk_satisfy(Rest)).
+% backtracks correctly
+light_all_trivials:-
+    (
+        wall_num(R,C,N),
+        adjacent_cells(R,C, Adj),
+        count_lights(Adj, LightsCount),
+        valid_light_placement(Adj, ValidCells),
+        NeededLights is N - LightsCount,
+        NeededLights > 0,
+        length(ValidCells, NeededLights)
+    ) -> 
+    (
+        maplist(create_light, ValidCells),
+        light_all_trivials
+    );
+    (
+        true
+    ).
 
-/* Appropriately light and restrict two 2x that are one cell apart from each other and there's no
-walls between them and between their adjacents cells and have walls on the other side
-e.g.
-before:
-•••••
-#2•2#
-•••••
-after:
-•••••
-#2*2#
-•••••
-*/
-light_two_2s:-
-	forall(wall_num(X,Y,2),light_two_2s(cell(X,Y))).
+% --- --- --- --- --- %
 
-light_two_2s(cell(R,C)):-
-	R1 is R+2, C1 is C+2,
-	((wall_num(R,C1,2),check_between_2(cell(R,C),cell(R,C1)))->restrict_all(cell(R,C),cell(R,C1)); true),
-	((wall_num(R1,C,2),check_between_2(cell(R,C),cell(R1,C)))->restrict_all(cell(R,C),cell(R,C)); true).
+% up, right, down, left.
+combination(3, n,y,y,y).
+combination(3, y,n,y,y).
+combination(3, y,y,n,y).
+combination(3, y,y,y,n).
 
-check_between_2(cell(R,C1),cell(R,C2)):-
-	RT is R-1,RB is R+1,CR is C1+1,
-	C_before is C1-1,C_after is C2+1,
-	\+ wall(RT,CR),\+wall(R,CR),\+wall(RB,CR),
-	wall(R,C_before),wall(R,C_after),
-	assert(light(R,CR)).
+combination(2, y,y,n,n).
+combination(2, n,y,y,n).
+combination(2, n,n,y,y).
+combination(2, y,n,n,y).
+combination(2, y,n,y,n).
+combination(2, n,y,n,y).
 
-check_between_2(cell(R1,C),cell(R2,C)):-
-	CL is C-1,CR is C+1,RB is R1+1,
-	R_before is R1-1,R_after is R2+1,
-	\+ wall(RB,CL),\+wall(RB,C),\+wall(RB,CR),
-	wall(R_before,C),wall(R_after,C),
-	assert(light(RB,C)).
+combination(1, y,n,n,n).
+combination(1, n,y,n,n).
+combination(1, n,n,y,n).
+combination(1, n,n,n,y).
 
-restrict_all_2(cell(R,C1),cell(R,C2)):-
-	RT is R-1,RB is R+1,
-	row_cells_until_wall(cell(RB,C1),CellsB),
-	forall((member(cell(X,Y),CellsB),Y\=C2),assert(restricted(X,Y))),
-	row_cells_until_wall(cell(RT,C1),CellsT),
-	forall((member(cell(X,Y),CellsT),Y\=C2),assert(restricted(X,Y))).
+try_light(R,C):- light(R,C).
+try_light(R,C):- valid(R,C),create_light(R,C).
 
-/* Appropriately light and restrict two 3s that are one cell apart from each other and
-there's no walls between them and between their adjacents cells
-e.g.
-before:
-•••••
-•3•3•
-•••••
-after:
-•••••
-*3*3*
-•••••
-*/
-light_two_3s:-
-	forall(wall_num(X,Y,3),light_two_3s(cell(X,Y))).
+not_light(R,C):- restricted(R,C).
+not_light(R,C):- wall(R,C).
+not_light(R,C):- \+ light(R,C),mark_restricted(R,C).
 
-light_two_3s(cell(R,C)):-
-	R1 is R+2, C1 is C+2,
-	((wall_num(R,C1,3),check_between(cell(R,C),cell(R,C1)))->restrict_all(cell(R,C),cell(R,C1)); true),
-	((wall_num(R1,C,3),check_between(cell(R,C),cell(R1,C)))->restrict_all(cell(R,C),cell(R,C)); true).
+try_combination(R,C):-
+    wall_num(R,C, N),
+    combination(N, Up, Right, Down, Left),
 
-check_between(cell(R,C1),cell(R,C2)):-
-	RT is R-1,RB is R+1,CR is C1+1,
-	C_before is C1-1,C_after is C2+1,
-	\+ wall(RT,CR),\+wall(R,CR),\+wall(RB,CR),
-	assert(light(R,CR)),
-	assert(light(R,C_before)),
-	assert(light(R,C_after)).
+    RP is R-1, RN is R+1, CP is C-1, CN is C+1,
+    (Up = y    -> try_light(RP,C); not_light(RP,C)),
+    (Down = y  -> try_light(RN,C); not_light(RN,C)),
+    (Left = y  -> try_light(R,CP); not_light(R,CP)),
+    (Right = y -> try_light(R,CN); not_light(R,CN)).
 
-check_between(cell(R1,C),cell(R2,C)):-
-	CL is C-1,CR is C+1,RB is R1+1,
-	R_before is R1-1,R_after is R2+1,
-	\+ wall(RB,CL),\+wall(RB,C),\+wall(RB,CR),
-	assert(light(RB,C)),
-	assert(light(R_before,C)),
-	assert(light(R_after,C)).
+prioritized_wall_num(R,C,3):- wall_num(R,C,3).
+prioritized_wall_num(R,C,1):- wall_num(R,C,1).
+prioritized_wall_num(R,C,2):- wall_num(R,C,2).
 
-restrict_all(cell(R,C1),cell(R,C2)):-
-	RT is R-1,RB is R+1,
-	row_cells_until_wall(cell(RB,C1),CellsB),
-	forall((member(cell(X,Y),CellsB),Y\=C2),assert(restricted(X,Y))),
-	row_cells_until_wall(cell(RT,C1),CellsT),
-	forall((member(cell(X,Y),CellsT),Y\=C2),assert(restricted(X,Y))).
+% backtracks correctly.
+light_with_backtrack:-
+    light_all_trivials,
+    seal_satisfied_cells,
+    light_isolated_restricted,
+    \+ dead_restricted,
+    
+    (
+        (prioritized_wall_num(R,C,_),\+ satisfied(R,C)) ->
+        (
+            try_combination(R,C),
+            light_with_backtrack
+        );
+        (
+            true
+        )
+    ).
 
-restrict_all(cell(R1,C),cell(R2,C)):-
-	CL is C-1,CR is C+1,
-	column_cells_until_wall(cell(R1,CL),CellsL),
-	forall((member(cell(X,Y),CellsL),X\=R2),assert(restricted(X,Y))),
-	column_cells_until_wall(cell(R1,CR),CellsR),
-	forall((member(cell(X,Y),CellsR),X\=R2),assert(restricted(X,Y))).
+% --- --- --- --- --- %
 
-/* Light the other nieghbor of a 2 that have three valid adjacent cells and share
-two of them with a 1
-e.g.
-before:
-•2•
-••1
-after:
-*2•
-••1
-*/
-light_2_diagonal:-
-	findall(cell(X,Y),(wall_num(X,Y,2),\+is_wall_num_satisfied(cell(X,Y)),valid_adjacent_cells(cell(X,Y),Cells),length(Cells,3)),Cells),
-	forall(member(cell(X,Y),Cells),light_2_diagonal(cell(X,Y))).
+mark_restricted([R,C]):- mark_restricted(R,C).
 
-light_2_diagonal(cell(R,C)):-
-	R1 is R+1, C1 is C+1,
-	R2 is R-1, C2 is C-1,
-	((wall_num(R1,C1,1),\+wall(R1,C),\+wall(R,C1)) ->
-		((\+wall(R,C2),assert(light(R,C2)));(\+wall(R2,C),assert(light(R2,C))));true),
-	((wall_num(R1,C2,1),\+wall(R1,C),\+wall(R,C2)) ->
-		((\+wall(R,C1),assert(light(R,C1)));(\+wall(R2,C),assert(light(R2,C))));true),
-	((wall_num(R2,C1,1),\+wall(R2,C),\+wall(R,C1)) ->
-		((\+wall(R,C2),assert(light(R,C2)));(\+wall(R1,C),assert(light(R1,C))));true),
-	((wall_num(R2,C2,1),\+wall(R2,C),\+wall(R,C2)) ->
-		((\+wall(R,C1),assert(light(R,C1)));(\+wall(R1,C),assert(light(R1,C))));true).
+seal_cell([R,C]):-
+    findall([RA,CA], (
+        adjacent_cell(R,C, RA,CA),
+        in_board(RA,CA),
+        \+ (wall(RA,CA);light(RA,CA);restricted(RA,CA))
+    ), L),
+    maplist(mark_restricted, L).
 
-/* Light the other two nieghbors of a 3 that is diagonal with a 1
-e.g.
-before:
-•••
-•3•
-••1
-after:
-•*•
-*3•
-••1
-*/
-light_3_diagonal:-
-	forall(wall_num(X,Y,3),light_3_diagonal(cell(X,Y))).
+% backtracks correctly.
+seal_satisfied_cells:-
+    findall([R,C], satisfied(R,C), L),
+    maplist(seal_cell, L).
 
-light_3_diagonal(cell(R,C)):-
-	R1 is R+1, C1 is C+1,
-	R2 is R-1, C2 is C-1,
-	(wall_num(R1,C1,1) -> (assert(light(R,C2)),assert(light(R2,C)));true),
-	(wall_num(R1,C2,1) -> (assert(light(R2,C)),assert(light(R,C1)));true),
-	(wall_num(R2,C1,1) -> (assert(light(R,C2)),assert(light(R1,C)));true),
-	(wall_num(R2,C2,1) -> (assert(light(R,C1)),assert(light(R1,C)));true).
+% --- --- --- --- --- %
 
-% light the restricted cells with the first valid
-% cell in their row or column that doesn't break
-% the level
-light_restricted:-
-	forall((restricted(X,Y),\+lighted(X,Y)),find_restricted(X,Y)).
+dead_restricted:-
+    restricted(R,C), \+ lighted(R, C),
+    \+ (reachable(R,C,RA,CA), valid(RA,CA)).
 
-find_restricted(R,C):-
-	row_cells_until_wall(cell(R,C), Rows),
-	column_cells_until_wall(cell(R,C), Columns),
-	append(Rows,Columns,Cells),
-	random_light(Cells).
+light_unlighted:- \+ valid(_,_).
+light_unlighted:-
+    valid(R,C), create_light(R,C), \+ dead_restricted,
+    light_isolated_restricted,
+    light_unlighted.
 
-random_light([]):-!.
-random_light([cell(X,Y)|Rest]):-
-	(restricted(X,Y);lighted(X,Y))->random_light(Rest);(assert_random_light(cell(X,Y))->true;random_light(Rest)).
-
-assert_random_light(cell(R,C)):-
-	assert(light(R,C)),
-	forall((restricted(X,Y),\+lighted(X,Y)),check_availability(cell(X,Y)))->
-		true;(retract(light(R,C)),false).
-
-check_availability(cell(X,Y)):-
-	row_cells_until_wall(cell(X,Y), Rows),
-	column_cells_until_wall(cell(X,Y), Columns),
-	append(Rows,Columns,Cells),
-	count_not_lighted(Cells,Cnt),
-	!,
-	Cnt > 0.
-
-
-% The repeated part of the solution
-iterate_solve(0):-!.
-iterate_solve(Cnt):-
-	Cnt > 0,
-	block_numbers,
-	block_satisfied_wall_nums,
-	satisfy_wall_nums(5),
-	light_restricted_isolated,
-	light_isolated,
-	light_2_diagonal,
-	light_two_2s,
-	Cnt1 is Cnt-1,
-	iterate_solve(Cnt1).
-
-% Block the corners of the numbers
-block_numbers:-
-	findall(wall_num(X,Y,N),(wall_num(X,Y,N),\+is_wall_num_satisfied(cell(X,Y))),Walls),
-	block_numbers(Walls).
-
-block_numbers([]):-!.
-block_numbers([wall_num(X,Y,N)|Rest]):-
-	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
-	length(Valid_adjacent_cells,L),
-	adjacent_cells(cell(X,Y),Adjacent_cells),
-	count_lights(Adjacent_cells,Cnt),
-	N1 is N-Cnt+1,
-	(N1 = L -> block_corners(Valid_adjacent_cells);true),
-	block_numbers(Rest).
-
-block_corners([]):-!.
-block_corners([cell(X,Y)|Rest]):-
-	X1 is X+1, Y1 is Y+1,
-	X2 is X-1, Y2 is Y-1,
-	((member(cell(X1,Y1),Rest))->
-		(assert(restricted(X,Y1)),assert(restricted(X1,Y)));true),
-	((member(cell(X1,Y2),Rest))->
-		(assert(restricted(X,Y2)),assert(restricted(X1,Y)));true),
-	((member(cell(X2,Y1),Rest))->
-		(assert(restricted(X,Y1)),assert(restricted(X2,Y)));true),
-	((member(cell(X2,Y2),Rest))->
-		(assert(restricted(X,Y2)),assert(restricted(X2,Y)));true),
-	block_corners(Rest).
-
-% Light isolated cells that can't be lighted unless they are light
-light_isolated:-
-	forall((in_board(R,C),\+wall(R,C),\+light(R,C),\+lighted(R,C))
-		,check_isolated(cell(R,C))).
-
-check_isolated(cell(R,C)):-
-	row_cells_until_wall(cell(R,C), Rows),
-	column_cells_until_wall(cell(R,C), Columns),
-	append(Rows,Columns,Cells),
-	count_not_lighted(Cells,Cnt),
-	!,
-	Cnt = 0 -> assert(light(R,C));true.
-
-% Count not lighted cells in the given list of cells
-count_not_lighted([],0):-!.
-count_not_lighted([cell(X,Y)|Rest],Cnt):-
-	count_not_lighted(Rest,Cnt1),
-	((lighted(X,Y);restricted(X,Y)) -> Cnt is Cnt1 ; Cnt is Cnt1 + 1).
-
-% Light restricted cells that have only one not lighted cell in their row and column
-light_restricted_isolated:-
-	forall((in_board(R,C),restricted(R,C),\+lighted(R,C))
-		,check_restricted_isolated(cell(R,C))).
-
-check_restricted_isolated(cell(R,C)):-
-	row_cells_until_wall(cell(R,C), Rows),
-	column_cells_until_wall(cell(R,C), Columns),
-	append(Rows,Columns,Cells),
-	count_not_lighted(Cells,Cnt),
-	!,
-	Cnt = 1 -> forall((member(cell(X,Y),Cells),\+ lighted(X,Y),\+ restricted(X,Y)),assert(light(X,Y)));true.
-
-% Light every not lighted cell in the board
-light_rest:-
-	forall((in_board(R,C),\+wall(R,C),\+light(R,C),\+lighted(R,C),\+restricted(R,C)),
-		assert(light(R,C))).
-
-satisfy_wall_nums(Cnt) :-
-	findall(cell(X,Y),(wall_num(X, Y, _),\+is_wall_num_satisfied(cell(X,Y))), Cells),
-	(Cells \= [] , Cnt>0) -> (set_light(Cells),Cnt1 is Cnt -1,satisfy_wall_nums(Cnt1));!.
-
-% Set the light to the satisfied wall num
-set_light([]):-!.
-set_light([cell(X,Y)|Rest]) :-
-	wall_num(X,Y,N),
-	adjacent_cells(cell(X,Y),Adjacent_cells),
-	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
-	length(Valid_adjacent_cells,L),
-	count_lights(Adjacent_cells,Cnt),
-	N1 is N-Cnt,
-	(L = N1 -> (assert_adjacent_light(Valid_adjacent_cells),set_light(Rest));set_light(Rest)).
-
-assert_adjacent_light([]):-!.
-assert_adjacent_light([cell(X,Y)|Rest]):-
-	assert(light(X,Y)),
-	assert_adjacent_light(Rest).
-
-% Block the not lighted cells in the adjacent of a satisfied wall num
-block_satisfied_wall_nums :-
-	findall(cell(X,Y),(wall_num(X, Y, _),is_wall_num_satisfied(cell(X,Y))), Cells),
-	(Cells \= []) -> block_light(Cells);!.
-
-block_light([]):-!.
-block_light([cell(X,Y)|Rest]) :-
-	valid_adjacent_cells(cell(X,Y),Valid_adjacent_cells),
-	assert_adjacent_restricted(Valid_adjacent_cells),
-	block_light(Rest).
-
-assert_adjacent_restricted([]):-!.
-assert_adjacent_restricted([cell(X,Y)|Rest]):-
-	assert(restricted(X,Y)),
-	assert_adjacent_restricted(Rest).
+% backtracks correctly.
+light_isolated_restricted:-
+    findall([RL,CL], (
+        restricted(R,C),
+        \+ lighted(R,C),
+        reachable(R,C,RL,CL),
+        valid(RL,CL),
+        \+ (
+            reachable(R,C,R2,C2), valid(R2,C2),
+            (R2 \= RL; C2 \= CL)
+        )
+    ), Lights),
+    sort(Lights, LightsSet), % remove duplicates because they are possible here!
+    maplist(create_light, LightsSet).

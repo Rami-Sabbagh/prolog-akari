@@ -7,8 +7,7 @@
 
 :- use_module(dataset).
 :- use_module(validation).
-% :- use_module(solution).
-:- use_module(solution_rami).
+:- use_module(solution).
 
 :- use_module(board_utils).
 
