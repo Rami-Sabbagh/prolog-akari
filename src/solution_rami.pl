@@ -6,14 +6,20 @@
 :- use_module(utils).
 :- use_module(validation).
 
+:- use_module(io_utils).
+
+point:- !.
+% point:- nl,print_grid,nl,trace.
+% point:- nl,print_grid,nl.
+
 solve:-
     restrict,
-    light_all_trivials,!,
-    light_with_backtrack,
-    light_count_correct,
-    seal_satisfied_cells, % seal them
-    % nl,print_grid,nl,trace,
-    light_unlighted,
+    light_all_trivials,!, point,
+    light_with_backtrack, 
+    seal_satisfied_cells, point,
+    \+ dead_restricted,
+    light_count_correct, point,
+    light_unlighted, point,
     solved,
     !.
 
@@ -38,70 +44,125 @@ count_lights(Cells, Count):-
 valid_light_placement(Cells, ValidCells):-
     findall([R,C], (member([R,C], Cells),valid(R,C)), ValidCells).
 
-light_all_trivials:-
-    light_a_trivial_cell,light_all_trivials;true.
+create_light([RL, CL]):- create_light(RL, CL).
 
-light_a_trivial_cell:-
-    wall_num(R,C,N),
-    adjacent_cells(R,C, Adj),
-    count_lights(Adj, LightsCount),
-    valid_light_placement(Adj, ValidCells),
-    NeededLights is N - LightsCount,
-    NeededLights > 0,
-    length(ValidCells, NeededLights),
-    forall(member([RL,CL], ValidCells), create_light(RL,CL)).
+% backtracks correctly
+light_all_trivials:-
+    (
+        wall_num(R,C,N),
+        adjacent_cells(R,C, Adj),
+        count_lights(Adj, LightsCount),
+        valid_light_placement(Adj, ValidCells),
+        NeededLights is N - LightsCount,
+        NeededLights > 0,
+        length(ValidCells, NeededLights)
+    ) -> 
+    (
+        maplist(create_light, ValidCells),
+        light_all_trivials
+    );
+    (
+        true
+    ).
 
 % --- --- --- --- --- %
 
+% up, right, down, left.
+combination(3, n,y,y,y).
+combination(3, y,n,y,y).
+combination(3, y,y,n,y).
+combination(3, y,y,y,n).
+
+combination(2, y,y,n,n).
+combination(2, n,y,y,n).
+combination(2, n,n,y,y).
+combination(2, y,n,n,y).
+combination(2, y,n,y,n).
+combination(2, n,y,n,y).
+
+combination(1, y,n,n,n).
+combination(1, n,y,n,n).
+combination(1, n,n,y,n).
+combination(1, n,n,n,y).
+
+try_light(R,C):- light(R,C).
+try_light(R,C):- valid(R,C),create_light(R,C).
+
+not_light(R,C):- 
+    \+ light(R,C),
+    (wall(R,C) -> true; mark_restricted(R,C)).
+
+try_combination(R,C):-
+    wall_num(R,C, N),
+    combination(N, Up, Right, Down, Left),
+
+    RP is R-1, RN is R+1, CP is C-1, CN is C+1,
+    (Up = y    -> try_light(RP,C); not_light(RP,C)),
+    (Down = y  -> try_light(RN,C); not_light(RN,C)),
+    (Left = y  -> try_light(R,CP); not_light(R,CP)),
+    (Right = y -> try_light(R,CN); not_light(R,CN)).
+
+prioritized_wall_num(R,C,3):- wall_num(R,C,3).
+prioritized_wall_num(R,C,1):- wall_num(R,C,1).
+prioritized_wall_num(R,C,2):- wall_num(R,C,2).
+
+% backtracks correctly.
 light_with_backtrack:-
     light_all_trivials,
     seal_satisfied_cells,
     light_isolated_restricted,
     
-    wall_num(R,C,N),
-
-    adjacent_cells(R,C, Adj),
-    count_lights(Adj, LightsCount),
-    valid_light_placement(Adj, ValidCells),
-    NeededLights is N - LightsCount,
-    NeededLights =\= 0,
-
-    member([RL,CL], ValidCells),
-    create_light(RL,CL),
-
-    light_with_backtrack;
-    true.
+    (
+        (prioritized_wall_num(R,C,_),\+ satisfied(R,C)) ->
+        (
+            % point,
+            try_combination(R,C),
+            % point,
+            light_with_backtrack
+        );
+        (
+            true
+        )
+    ).
 
 % --- --- --- --- --- %
 
+mark_restricted([R,C]):- mark_restricted(R,C).
+
+seal_cell([R,C]):-
+    findall([RA,CA], (
+        adjacent_cell(R,C, RA,CA),
+        in_board(RA,CA),
+        \+ (wall(RA,CA);light(RA,CA);restricted(RA,CA))
+    ), L),
+    maplist(mark_restricted, L).
+
+% backtracks correctly.
 seal_satisfied_cells:-
-    wall_num(R,C,N),
-    findall([RA,CA],(adjacent_cell(R,C,RA,CA),light(RA,CA)),Lights),
-    length(Lights,N),
-    adjacent_cell(R,C,RA,CA),
-    in_board(RA,CA),
-    \+ (wall(RA,CA);light(RA,CA);restricted(RA,CA)),
-    mark_restricted(RA,CA),
-    seal_satisfied_cells
-    ;true.
+    findall([R,C], satisfied(R,C), L),
+    maplist(seal_cell, L).
 
 % --- --- --- --- --- %
 
+dead_restricted:-
+    restricted(R,C), \+ lighted(R, C),
+    \+ (reachable(R,C,RA,CA), valid(RA,CA)).
+
+light_unlighted:- \+ valid(_,_).
 light_unlighted:-
-    light_isolated_restricted,
     valid(R,C), create_light(R,C),
-    light_unlighted
-    ;true.
+    light_isolated_restricted,
+    light_unlighted.
 
+% backtracks correctly.
 light_isolated_restricted:-
-    restricted(R,C),
-    \+ lighted(R,C),
-    findall([RA,CA],(
-        reachable(R,C,RA,CA),
-        valid(RA,CA)
-    ),Cells),
-    sort(Cells,[[RL,CL]]),
-    create_light(RL, CL),
-    light_isolated_restricted
-    ;true.
-
+    findall([RL,CL], (
+        restricted(R,C),
+        \+ lighted(R,C),
+        findall([RA,CA],(
+            reachable(R,C,RA,CA),
+            valid(RA,CA)
+        ),Cells),
+        sort(Cells,[[RL,CL]])
+    ), L),
+    maplist(create_light, L).

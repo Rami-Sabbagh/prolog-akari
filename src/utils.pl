@@ -5,6 +5,9 @@
     valid/2, % valid for placing a light
     adjacent_cell/4,
     adjacent_cells/3,
+
+    lightness/3, % lightness(R,C, Lightness) - calculates the lightness of a cell.
+    satisfied/2, % checks if a cell is satisfied.
     
     reachable/4, % alias for reachable(any, R1,C1, R2,C2).
     reachable/5
@@ -86,6 +89,12 @@ lighted(R, C):-
 valid(R, C):-
     in_board(R,C),
     \+ (restricted(R,C);wall(R,C);lighted(R,C)).
+
+lightness(R,C, L):-
+    findall(_,(adjacent_cell(R,C,RA,CA),light(RA,CA)),Lights),
+    length(Lights, L).
+
+satisfied(R,C):- wall_num(R,C, N), lightness(R,C, N).
 
 % complexity: O(1)
 adjacent_cell(R1,C1, R2,C2):- R2 is R1 + 1, C2 is C1.
