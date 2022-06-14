@@ -6,6 +6,8 @@
 :- use_module(utils).
 :- use_module(validation).
 
+:- use_module(templates).
+
 :- use_module(io_utils).
 
 point:- !.
@@ -13,6 +15,7 @@ point:- !.
 % point:- nl,print_grid,nl.
 
 solve:-
+    point, apply_templates, !, point,
     restrict,
     refresh_lighted, !,
     light_all_trivials,!, point,
