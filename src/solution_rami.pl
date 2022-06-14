@@ -10,11 +10,11 @@
 
 point:- !.
 % point:- nl,print_grid,nl,trace.
-% point2:- nl,print_grid,nl,trace.
 % point:- nl,print_grid,nl.
 
 solve:-
     restrict,
+    refresh_lighted,
     light_all_trivials,!, point,
     light_with_backtrack, 
     seal_satisfied_cells, point,

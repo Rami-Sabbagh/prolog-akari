@@ -1,6 +1,6 @@
 :- module(utils, [
     create_light/2,
-    spread_lights/0, % used to properly load puzzle's solutions.
+    refresh_lighted/0, % used to properly load puzzle's solutions.
     between_unordered/3,
     in_board/2, % tests if the cell is in board, can be also used for iterating over all cells.
     lighted/2,
@@ -29,6 +29,10 @@
 
 :- use_module(board).
 
+refresh_lighted:-
+    retractall(really_lighted(_,_)),
+    forall((light(R,C),\+ really_lighted(R,C)), spread_light(R,C)).
+
 create_really_lighted([R,C]):-
     asserta(really_lighted(R,C), Ref),
     (true;erase(Ref),fail),
@@ -40,9 +44,6 @@ spread_light(R,C):-
         reachable(R,C, RL,CL), \+ really_lighted(RL,CL)
     ), List),
     maplist(create_really_lighted, List).
-
-spread_lights:-
-    forall((light(R,C),\+ really_lighted(R,C)), spread_light(R,C)).
 
 create_light(R,C):-
     assertz(light(R,C), Ref),

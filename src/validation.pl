@@ -8,6 +8,7 @@
 
 % complexity: O(N^4) where N is the board dimension.
 solved:-
+    refresh_lighted,
     valid_board,
     all_cells_lighted,
     no_double_light,

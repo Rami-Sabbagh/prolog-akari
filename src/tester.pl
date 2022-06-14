@@ -5,16 +5,14 @@
 
 :- begin_tests(krazydad).
 
-:- use_module(utils).
 :- use_module(dataset).
+:- use_module(validation).
 % :- use_module(solution).
 :- use_module(solution_rami).
-:- use_module(validation).
 
 :- use_module(board_utils).
 
 test_puzzle_untimed:-
-    spread_lights,
     solved,
     unsolve,
     \+ solved,
