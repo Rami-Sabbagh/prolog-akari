@@ -40,6 +40,11 @@ should_light(R,C):- in_board(R,C), create_light(R,C).
 
 should_be_empty(R,C):- \+ wall(R,C).
 
+can_be_light(R,C):- light(R,C).
+can_be_light(R,C):- valid(R,C).
+
+light_if_possible(R,C):- valid(R,C), create_light(R,C); true.
+
 should_be_invalid(R,C):- \+ in_board(R,C). % (should be invalid)
 should_be_invalid(R,C):- wall(R,C).
 should_be_invalid(R,C):- lighted(R,C), \+ light(R,C).
@@ -95,6 +100,52 @@ matcher(R,C, shared_3_1_flip_v):-
 
 matcher(R,C, shared_3_1_flip_vh):-
     wall_num(R,C,3), R2 is R-1, C2 is C-1, wall_num(R2,C2, 1).
+
+% --- --- --- %
+
+matcher(R,C, shared_2_1_normal):-
+    wall_num(R,C,2),
+    RO is R+1, CO is C+1, % the other wall num
+    RL is R-1, CL is C-1, % possible for light/wall
+    wall_num(RO,CO, 1),
+    (
+        should_be_invalid(RL,C),can_be_light(R,CL);
+        should_be_invalid(R,CL),can_be_light(RL,C)
+    ).
+
+matcher(R,C, shared_2_1_flip_h):-
+    wall_num(R,C,2),
+    RO is R+1, CO is C-1, % the other wall num
+    RL is R-1, CL is C+1, % possible for light/wall
+    wall_num(RO,CO, 1),
+    (
+        should_be_invalid(RL,C),can_be_light(R,CL);
+        should_be_invalid(R,CL),can_be_light(RL,C)
+    ).
+
+matcher(R,C, shared_2_1_flip_v):-
+    wall_num(R,C,2),
+    RO is R-1, CO is C+1, % the other wall num
+    RL is R+1, CL is C-1, % possible for light/wall
+    wall_num(RO,CO, 1),
+    (
+        should_be_invalid(RL,C),can_be_light(R,CL);
+        should_be_invalid(R,CL),can_be_light(RL,C)
+    ).
+
+matcher(R,C, shared_2_1_flip_vh):-
+    wall_num(R,C,2),
+    RO is R-1, CO is C-1, % the other wall num
+    RL is R+1, CL is C+1, % possible for light/wall
+    wall_num(RO,CO, 1),
+    (
+        should_be_invalid(RL,C),can_be_light(R,CL);
+        should_be_invalid(R,CL),can_be_light(RL,C)
+    ).
+
+% --- --- --- %
+
+
 
 % --- --- --- %
 
@@ -161,4 +212,26 @@ template(shared_3_1_flip_h, R,C):-
 template(shared_3_1_flip_vh, R,C):-
     RL is R+1, CL is C+1, R1 is R-1, R2 is R-2, C1 is C-1, C2 is C-2,
     should_light(RL,C), should_light(R,CL),
+    should_restrict(R2,C1), should_restrict(R1, C2).
+
+% --- --- --- %
+
+template(shared_2_1_normal, R,C):-
+    RL is R-1, CL is C-1, R1 is R+1, R2 is R+2, C1 is C+1, C2 is C+2,
+    light_if_possible(RL,C), light_if_possible(R,CL),
+    should_restrict(R2,C1), should_restrict(R1, C2).
+
+template(shared_2_1_flip_v, R,C):-
+    RL is R+1, CL is C-1, R1 is R-1, R2 is R-2, C1 is C+1, C2 is C+2,
+    light_if_possible(RL,C), light_if_possible(R,CL),
+    should_restrict(R2,C1), should_restrict(R1, C2).
+
+template(shared_2_1_flip_h, R,C):-
+    RL is R-1, CL is C+1, R1 is R+1, R2 is R+2, C1 is C-1, C2 is C-2,
+    light_if_possible(RL,C), light_if_possible(R,CL),
+    should_restrict(R2,C1), should_restrict(R1, C2).
+
+template(shared_2_1_flip_vh, R,C):-
+    RL is R+1, CL is C+1, R1 is R-1, R2 is R-2, C1 is C-1, C2 is C-2,
+    light_if_possible(RL,C), light_if_possible(R,CL),
     should_restrict(R2,C1), should_restrict(R1, C2).
