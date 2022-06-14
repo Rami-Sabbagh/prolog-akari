@@ -16,8 +16,8 @@ solve:-
     restrict,
     light_all_trivials,!, point,
     light_with_backtrack, 
-    seal_satisfied_cells, point,
-    \+ dead_restricted,
+    seal_satisfied_cells,
+    \+ dead_restricted, point,
     light_count_correct, point,
     light_unlighted, point,
     solved,
@@ -159,10 +159,11 @@ light_isolated_restricted:-
     findall([RL,CL], (
         restricted(R,C),
         \+ lighted(R,C),
-        findall([RA,CA],(
-            reachable(R,C,RA,CA),
-            valid(RA,CA)
-        ),Cells),
-        sort(Cells,[[RL,CL]])
+        reachable(R,C,RL,CL),
+        valid(RL,CL),
+        \+ (
+            reachable(R,C,R2,C2), valid(R2,C2),
+            (R2 \= RL; C2 \= CL)
+        )
     ), L),
     maplist(create_light, L).
