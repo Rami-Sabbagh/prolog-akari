@@ -14,7 +14,7 @@ point:- !.
 
 solve:-
     restrict,
-    refresh_lighted,
+    refresh_lighted, !,
     light_all_trivials,!, point,
     light_with_backtrack, 
     seal_satisfied_cells, point,
@@ -45,7 +45,7 @@ count_lights(Cells, Count):-
 valid_light_placement(Cells, ValidCells):-
     findall([R,C], (member([R,C], Cells),valid(R,C)), ValidCells).
 
-create_light([RL, CL]):- create_light(RL, CL).
+create_light([RL, CL]):- valid(RL,CL),create_light(RL, CL).
 
 % backtracks correctly
 light_all_trivials:-
@@ -112,13 +112,14 @@ light_with_backtrack:-
     light_all_trivials,
     seal_satisfied_cells,
     light_isolated_restricted,
+    \+ dead_restricted,
     
     (
         (prioritized_wall_num(R,C,_),\+ satisfied(R,C)) ->
         (
-            % point,
+            point,
             try_combination(R,C),
-            % point,
+            point,
             light_with_backtrack
         );
         (
