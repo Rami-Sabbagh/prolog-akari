@@ -158,6 +158,22 @@ matcher(R,C, line_3_v):-
 
 % --- --- --- %
 
+matcher(R,C, line_2_h):-
+    wall_num(R,CL,2), C is CL + 1, CR is C + 1,
+    wall_num(R,CR,2), RP is R - 1, RN is R + 1,
+    can_be_light(R,C), should_be_empty(RP,C), should_be_empty(RN,C),
+    CL2 is CL - 1, CR2 is CR + 1,
+    should_be_invalid(R,CL2), should_be_invalid(R,CR2).
+
+matcher(R,C, line_2_v):-
+    wall_num(RP,C,2), R is RP + 1, RN is R + 1,
+    wall_num(RN,C,2), CP is C - 1, CN is C + 1,
+    can_be_light(R,C), should_be_empty(R,CP), should_be_empty(R,CN),
+    RP2 is RP - 1, RN2 is RN + 1,
+    should_be_invalid(RP2,C), should_be_invalid(RN2,C).
+
+% --- --- --- %
+
 % template(Template, R,C).
 
 template(restrict_3, R,C):-
@@ -276,3 +292,29 @@ template(line_3_v, R,C):-
     maplist(should_restrict, Spots).
 
 % --- --- --- %
+
+template(line_2_h, R,C):-
+    should_light(R,C),
+    RP is R-1, RN is R+1,
+    CP is C-1, CN is C+1,
+    findall([RT,CT], (
+        should_be_empty(RP,CP),reachable(left,  RP,CP, RT,CT);
+        should_be_empty(RN,CP),reachable(left,  RN,CP, RT,CT);
+        should_be_empty(RP,CN),reachable(right, RP,CN, RT,CT);
+        should_be_empty(RN,CN),reachable(right, RN,CN, RT,CT)
+    ), SpotsUnsorted),
+    sort(SpotsUnsorted, Spots),
+    maplist(should_restrict, Spots).
+
+template(line_2_v, R,C):-
+    should_light(R,C),
+    RP is R-1, RN is R+1,
+    CP is C-1, CN is C+1,
+    findall([RT,CT], (
+        should_be_empty(RP,CP),reachable(up,   RP,CP, RT,CT);
+        should_be_empty(RP,CN),reachable(up,   RP,CN, RT,CT);
+        should_be_empty(RN,CP),reachable(down, RN,CP, RT,CT);
+        should_be_empty(RN,CN),reachable(down, RN,CN, RT,CT)
+    ), SpotsUnsorted),
+    sort(SpotsUnsorted, Spots),
+    maplist(should_restrict, Spots).
