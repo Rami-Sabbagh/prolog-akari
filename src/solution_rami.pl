@@ -150,8 +150,8 @@ dead_restricted:-
 
 light_unlighted:- \+ valid(_,_).
 light_unlighted:-
-    valid(R,C), create_light(R,C),
     light_isolated_restricted,
+    valid(R,C), create_light(R,C), \+ dead_restricted, point,
     light_unlighted.
 
 % backtracks correctly.
