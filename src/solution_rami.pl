@@ -10,13 +10,14 @@
 
 point:- !.
 % point:- nl,print_grid,nl,trace.
+% point2:- nl,print_grid,nl,trace.
 % point:- nl,print_grid,nl.
 
 solve:-
     restrict,
     light_all_trivials,!, point,
     light_with_backtrack, 
-    seal_satisfied_cells,
+    seal_satisfied_cells, point,
     \+ dead_restricted, point,
     light_count_correct, point,
     light_unlighted, point,
@@ -150,8 +151,8 @@ dead_restricted:-
 
 light_unlighted:- \+ valid(_,_).
 light_unlighted:-
-    light_isolated_restricted,
     valid(R,C), create_light(R,C), \+ dead_restricted, point,
+    light_isolated_restricted, point,
     light_unlighted.
 
 % backtracks correctly.
