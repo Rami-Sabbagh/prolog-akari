@@ -12,7 +12,8 @@
 % :- choose_nth1_puzzle(441). %3-line demo
 
 % :- choose_nth1_puzzle(1030).
-:- choose_nth1_puzzle(2010).
+% :- choose_nth1_puzzle(2010).
+:- choose_nth1_puzzle(2299).
 
 % :- choose_nth1_puzzle(1882).
 % :- choose_nth1_puzzle(2755).
