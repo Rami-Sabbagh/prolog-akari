@@ -19,7 +19,7 @@ test_puzzle_untimed:-
     solved.
 
 % 22 seconds limit
-test_puzzle:- call_with_time_limit(22, test_puzzle_untimed).
+test_puzzle:- call_with_time_limit(300, test_puzzle_untimed).
 
 % -- ENABLE ONE AT A TIME -- %
 
