@@ -62,7 +62,7 @@ between_unordered(A, B, V):- between(A, B, V);between(B, A, V).
 %
 % checks or generates cells in-board.
 in_board(R, C):-
-    size(Columns, Rows),
+    size(Rows, Columns),
     between(1, Rows, R),
     between(1, Columns, C).
 
