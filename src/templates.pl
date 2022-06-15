@@ -4,6 +4,7 @@
 
 :- use_module(board).
 :- use_module(utils).
+:- use_module(solution).
 
 point:- !.
 % :- use_module(io_utils).
@@ -20,6 +21,11 @@ apply_templates(Exclude):-
 
     sort(MatchesUnsorted, Matches),
     maplist(apply_template, Matches),
+    
+    solution:light_all_trivials,
+    solution:seal_satisfied_cells,
+    solution:light_isolated_restricted,
+
     length(Matches, Count),
     append(Matches, Exclude, NewExclude),
     Count =\= 0 -> apply_templates(NewExclude); true.
