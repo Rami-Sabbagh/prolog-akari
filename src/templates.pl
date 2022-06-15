@@ -109,6 +109,44 @@ matcher(R,C, shared_3_1_flip_vh):-
 
 % --- --- --- %
 
+matcher(R,C, shared_3_2_normal):-
+    wall_num(R,C,3), R2 is R+1, C2 is C+1, wall_num(R2,C2, 2),
+    R3 is R+2, C3 is C+2, (
+        should_be_invalid(R2,C3),light(R3,C2);
+        should_be_invalid(R3,C2),light(R2,C3)
+    ).
+
+matcher(R,C, shared_3_2_flip_h):-
+    wall_num(R,C,3), R2 is R+1, C2 is C-1, wall_num(R2,C2, 2),
+    R3 is R+2, C3 is C-2, (
+        should_be_invalid(R2,C3),light(R3,C2);
+        should_be_invalid(R3,C2),light(R2,C3)
+    ).
+
+matcher(R,C, shared_3_2_flip_v):-
+    wall_num(R,C,3), R2 is R-1, C2 is C+1, wall_num(R2,C2, 2),
+    R3 is R-2, C3 is C+2, (
+        should_be_invalid(R2,C3),light(R3,C2);
+        should_be_invalid(R3,C2),light(R2,C3)
+    ).
+
+matcher(R,C, shared_3_2_flip_vh):-
+    wall_num(R,C,3), R2 is R-1, C2 is C-1, wall_num(R2,C2, 2),
+    R3 is R-2, C3 is C-2, (
+        should_be_invalid(R2,C3),light(R3,C2);
+        should_be_invalid(R3,C2),light(R2,C3)
+    ).
+
+% --- --- --- %
+
+matcher(R,C, shared_3_3_normal):-
+    wall_num(R,C,3), R2 is R+1, C2 is C+1, wall_num(R2,C2, 3).
+
+matcher(R,C, shared_3_3_flipped):-
+    wall_num(R,C,3), R2 is R+1, C2 is C-1, wall_num(R2,C2, 3).
+
+% --- --- --- %
+
 matcher(R,C, shared_2_1_normal):-
     wall_num(R,C,2),
     RO is R+1, CO is C+1, % the other wall num
@@ -243,6 +281,36 @@ template(shared_3_1_flip_vh, R,C):-
     RL is R+1, CL is C+1, R1 is R-1, R2 is R-2, C1 is C-1, C2 is C-2,
     should_light(RL,C), should_light(R,CL),
     should_restrict(R2,C1), should_restrict(R1, C2).
+
+% --- --- --- %
+
+template(shared_3_2_normal, R,C):-
+    RL is R-1, CL is C-1,
+    should_light(RL,C), should_light(R,CL).
+
+template(shared_3_2_flip_v, R,C):-
+    RL is R+1, CL is C-1,
+    should_light(RL,C), should_light(R,CL).
+
+template(shared_3_2_flip_h, R,C):-
+    RL is R-1, CL is C+1,
+    should_light(RL,C), should_light(R,CL).
+
+template(shared_3_2_flip_vh, R,C):-
+    RL is R+1, CL is C+1,
+    should_light(RL,C), should_light(R,CL).
+
+% --- --- --- %
+
+template(shared_3_3_normal, R,C):-
+    RL is R-1, CL is C-1, R1 is R+1, R2 is R+2, C1 is C+1, C2 is C+2,
+    should_light(RL,C), should_light(R,CL),
+    should_light(R2,C1), should_light(R1, C2).
+
+template(shared_3_3_flipped, R,C):-
+    RL is R-1, CL is C+1, R1 is R+1, R2 is R+2, C1 is C-1, C2 is C-2,
+    should_light(RL,C), should_light(R,CL),
+    should_light(R2,C1), should_light(R1, C2).
 
 % --- --- --- %
 
