@@ -13,13 +13,13 @@ point:- !.
 % point:- nl,print_grid,nl,trace.
 
 solve:-
-    point, apply_templates, !, point,
-    restrict,
     refresh_lighted, !,
+    restrict, !,
     light_all_trivials,!, point,
+    apply_templates, !, point,
     light_with_backtrack, 
     seal_satisfied_cells, point,
-    \+ dead_restricted, point,
+    \+ dead_restricted,
     light_count_correct, point,
     light_unlighted, point,
     solved,
